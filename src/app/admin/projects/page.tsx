@@ -59,7 +59,15 @@ export default function ProjectsPage() {
           if (authorId) {
             localStorage.setItem('authorId', authorId)
           }
+        } else {
+          toast.error('No users found. Please create a user first.')
+          return
         }
+      }
+
+      if (!authorId) {
+        toast.error('Unable to get user ID. Please refresh and try again.')
+        return
       }
 
       const payload = {
@@ -76,7 +84,7 @@ export default function ProjectsPage() {
         client: formData.client || null,
         isActive: formData.isActive,
         isFeatured: formData.isFeatured,
-        authorId: authorId || 'default-author-id'
+        authorId: authorId
       }
 
       console.log('Submitting payload:', payload)

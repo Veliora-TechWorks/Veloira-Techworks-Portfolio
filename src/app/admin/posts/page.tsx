@@ -52,7 +52,15 @@ export default function PostsPage() {
           if (authorId) {
             localStorage.setItem('authorId', authorId)
           }
+        } else {
+          toast.error('No users found. Please create a user first.')
+          return
         }
+      }
+
+      if (!authorId) {
+        toast.error('Unable to get user ID. Please refresh and try again.')
+        return
       }
 
       const payload = {
@@ -65,7 +73,7 @@ export default function PostsPage() {
         tags: [formData.linkedinUrl],
         readTime: 5,
         isPublished: formData.isPublished,
-        authorId: authorId || 'default-author-id',
+        authorId: authorId,
         createdAt: formData.publishedAt ? new Date(formData.publishedAt).toISOString() : new Date().toISOString()
       }
 
