@@ -10,6 +10,7 @@ export async function GET() {
     })
     return NextResponse.json(posts)
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 })
+    console.error('Posts API error:', error)
+    return NextResponse.json([], { status: 200 })
   }
 }
