@@ -89,7 +89,7 @@ const Footer = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-xl">V</span>
                 </div>
-                <Link href="/" className="font-display font-bold text-xl hover:text-primary-400 transition-colors">
+                <Link href="/admin/login" className="font-display font-bold text-xl hover:text-primary-400 transition-colors">
                   Veliora TechWorks
                 </Link>
               </div>

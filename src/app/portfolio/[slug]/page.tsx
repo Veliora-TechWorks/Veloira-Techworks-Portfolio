@@ -57,6 +57,11 @@ export default function ProjectDetailPage() {
       <section className="pt-32 pb-8 bg-gradient-to-br from-gray-50 to-white">
         <div className="container-custom">
           <div className="max-w-6xl mx-auto">
+            <Link href="/portfolio" className="inline-flex items-center text-primary-500 hover:text-primary-600 mb-6 transition-colors">
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Back to Portfolio
+            </Link>
+            
             <div className="flex items-center gap-3 mb-4">
               <span className="text-sm font-medium text-primary-500 bg-primary-50 px-3 py-1 rounded-full">
                 {project.category}
@@ -73,6 +78,13 @@ export default function ProjectDetailPage() {
             </h1>
 
             <p className="text-xl text-dark-600 mb-6">{project.description}</p>
+
+            {project.client && (
+              <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 inline-block">
+                <span className="text-sm font-medium text-gray-500">Client:</span>
+                <span className="text-dark-800 font-semibold ml-2">{project.client}</span>
+              </div>
+            )}
 
             {project.gallery && project.gallery.length > 0 && (
               <div className="mb-8">
@@ -157,15 +169,18 @@ export default function ProjectDetailPage() {
 
           {project.content && (
             <div className="mb-8">
-              <h2 className="text-2xl font-display font-bold text-dark-800 mb-4">Project Details</h2>
-              <p className="text-dark-600 leading-relaxed whitespace-pre-line">{project.content}</p>
-            </div>
-          )}
-
-          {project.client && (
-            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-8">
-              <h3 className="font-semibold text-dark-800 mb-2">Client</h3>
-              <p className="text-dark-600">{project.client}</p>
+              <h2 className="text-2xl font-display font-bold text-dark-800 mb-6">Project Details</h2>
+              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <div className="prose prose-lg max-w-none text-dark-600">
+                  {project.content.split('\n').map((paragraph: string, idx: number) => (
+                    paragraph.trim() ? (
+                      <p key={idx} className="mb-4 last:mb-0 leading-relaxed">
+                        {paragraph.trim()}
+                      </p>
+                    ) : null
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
@@ -192,12 +207,6 @@ export default function ProjectDetailPage() {
                 View Source Code
               </a>
             )}
-          </div>
-
-          <div className="text-center pt-6 border-t border-gray-200">
-            <Link href="/portfolio" className="btn-outline">
-              Back to Portfolio
-            </Link>
           </div>
         </div>
       </section>

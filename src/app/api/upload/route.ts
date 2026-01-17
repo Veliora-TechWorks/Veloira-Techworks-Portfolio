@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { v2 as cloudinary } from 'cloudinary'
-import { prisma } from '@/lib/prisma'
+import { adminDb } from '@/lib/firebase-admin'
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -31,16 +31,17 @@ export async function POST(request: NextRequest) {
       ).end(buffer)
     })
 
-    const media = await prisma.media.create({
-      data: {
-        filename: result.public_id,
-        originalName: file.name,
-        mimeType: file.type,
-        size: file.size,
-        url: result.secure_url,
-        category
-      }
+    const docRef = await adminDb.collection('media').add({
+      filename: result.public_id,
+      originalName: file.name,
+      mimeType: file.type,
+      size: file.size,
+      url: result.secure_url,
+      category,
+      createdAt: new Date()
     })
+
+    const media = { id: docRef.id, filename: result.public_id, originalName: file.name, mimeType: file.type, size: file.size, url: result.secure_url, category }
 
     return NextResponse.json(media, { status: 200 })
   } catch (error) {

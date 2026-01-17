@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { adminDb } from '@/lib/firebase-admin'
 
 export async function GET() {
   try {
-    const posts = await prisma.post.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: { author: { select: { name: true } } }
-    })
+    const snapshot = await adminDb.collection('posts')
+      .orderBy('createdAt', 'desc')
+      .get()
+    
+    const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
     return NextResponse.json(posts)
   } catch (error) {
     console.error('Get posts error:', error)
@@ -18,7 +19,8 @@ export async function POST(request: Request) {
   try {
     const data = await request.json()
     console.log('Creating post with data:', data)
-    const post = await prisma.post.create({ data })
+    const docRef = await adminDb.collection('posts').add({ ...data, createdAt: new Date() })
+    const post = { id: docRef.id, ...data }
     console.log('Created post:', post)
     return NextResponse.json(post)
   } catch (error) {

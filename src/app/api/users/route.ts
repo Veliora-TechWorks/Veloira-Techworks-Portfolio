@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { adminDb } from '@/lib/firebase-admin'
 
 export async function GET() {
   try {
-    const users = await prisma.user.findMany({
-      select: { id: true, name: true, email: true }
-    })
+    const snapshot = await adminDb.collection('users').get()
+    const users = snapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      name: doc.data().name, 
+      email: doc.data().email 
+    }))
     return NextResponse.json(users)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })

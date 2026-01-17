@@ -124,13 +124,31 @@ export default function PostsPage() {
 
   const handleEdit = (post: any) => {
     setEditingPost(post)
+    
+    // Safe date handling
+    let publishedAt = ''
+    if (post.createdAt) {
+      try {
+        if (typeof post.createdAt === 'string') {
+          publishedAt = post.createdAt.split('T')[0]
+        } else if (post.createdAt.seconds) {
+          publishedAt = new Date(post.createdAt.seconds * 1000).toISOString().split('T')[0]
+        } else {
+          publishedAt = new Date(post.createdAt).toISOString().split('T')[0]
+        }
+      } catch (error) {
+        console.error('Date parsing error:', error)
+        publishedAt = ''
+      }
+    }
+    
     setFormData({
-      title: post.title,
+      title: post.title || '',
       excerpt: post.excerpt || '',
       image: post.image || '',
-      publishedAt: post.createdAt?.split('T')[0] || '',
+      publishedAt: publishedAt,
       linkedinUrl: post.tags?.[0] || '',
-      isPublished: post.isPublished
+      isPublished: post.isPublished ?? true
     })
     setShowModal(true)
   }

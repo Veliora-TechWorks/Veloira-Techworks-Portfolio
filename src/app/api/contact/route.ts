@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { adminDb } from '@/lib/firebase-admin'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,20 +15,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Create contact entry
-    const contact = await prisma.contact.create({
-      data: {
-        name,
-        email,
-        phone: phone || null,
-        company: company || null,
-        subject,
-        message,
-        source: 'website'
-      }
+    const docRef = await adminDb.collection('contacts').add({
+      name,
+      email,
+      phone: phone || null,
+      company: company || null,
+      subject,
+      message,
+      source: 'website',
+      createdAt: new Date()
     })
 
     return NextResponse.json(
-      { message: 'Contact form submitted successfully', id: contact.id },
+      { message: 'Contact form submitted successfully', id: docRef.id },
       { status: 201 }
     )
   } catch (error) {

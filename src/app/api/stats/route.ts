@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { adminDb } from '@/lib/firebase-admin'
 
 export async function GET() {
   try {
-    const [projectsCount, articlesCount, servicesCount] = await Promise.all([
-      prisma.project.count({ where: { isActive: true } }),
-      prisma.post.count({ where: { isPublished: true } }),
-      prisma.service.count({ where: { isActive: true } })
+    const [projectsSnapshot, articlesSnapshot, servicesSnapshot] = await Promise.all([
+      adminDb.collection('projects').where('isActive', '==', true).get(),
+      adminDb.collection('posts').where('isPublished', '==', true).get(),
+      adminDb.collection('services').where('isActive', '==', true).get()
     ])
 
     return NextResponse.json({
-      projects: projectsCount,
-      articles: articlesCount,
-      services: servicesCount
+      projects: projectsSnapshot.size,
+      articles: articlesSnapshot.size,
+      services: servicesSnapshot.size
     })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 })

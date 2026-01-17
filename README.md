@@ -22,7 +22,7 @@ A premium, multi-page company portfolio website with a secure admin dashboard fo
 - **Frontend**: Next.js 14, React 18, TypeScript
 - **Styling**: Tailwind CSS, Framer Motion
 - **Backend**: Next.js API Routes, Node.js
-- **Database**: PostgreSQL with Prisma ORM
+- **Database**: Firebase Firestore
 - **Authentication**: JWT, bcryptjs
 - **UI Components**: Lucide React icons, React Hook Form
 - **Deployment**: Vercel-ready
@@ -45,9 +45,10 @@ A premium, multi-page company portfolio website with a secure admin dashboard fo
    cp .env.example .env
    ```
    
-   Update the `.env` file with your database URL and secrets:
+   Update the `.env` file with your Firebase configuration:
    ```env
-   DATABASE_URL="postgresql://postgres:Pulsar@localhost:5432/veliora_techworks_portfolio"
+   # Firebase configuration is already set up
+   # Just ensure your Firebase project is properly configured
    NEXTAUTH_SECRET="your-secret-key-here"
    NEXTAUTH_URL="http://localhost:3000"
    JWT_SECRET="your-jwt-secret-here"
@@ -55,14 +56,8 @@ A premium, multi-page company portfolio website with a secure admin dashboard fo
 
 4. **Set up the database**
    ```bash
-   # Generate Prisma client
-   npm run db:generate
-   
-   # Push database schema
-   npm run db:push
-   
-   # Or run migrations (for production)
-   npm run db:migrate
+   # Seed Firebase with initial data
+   npm run firebase:seed
    ```
 
 5. **Start the development server**
@@ -75,7 +70,7 @@ A premium, multi-page company portfolio website with a secure admin dashboard fo
 
 ## 🗄️ Database Schema
 
-The application uses PostgreSQL with the following main entities:
+The application uses Firebase Firestore with the following main collections:
 
 - **Users**: Admin and editor accounts
 - **Services**: Company service offerings
@@ -83,20 +78,25 @@ The application uses PostgreSQL with the following main entities:
 - **Posts**: Blog posts with SEO metadata
 - **Contacts**: Contact form submissions
 - **Media**: File uploads and media management
-- **Pages**: Dynamic page content
-- **Settings**: Application configuration
+
+See `FIREBASE_SETUP.md` for detailed collection schemas.
 
 ## 🔐 Admin Access
 
-1. **Create an admin user** (you'll need to do this manually in the database initially)
+1. **Seed the database** with initial admin user:
+   ```bash
+   npm run firebase:seed
+   ```
 2. **Access the admin dashboard** at `/admin`
-3. **Default features**:
+3. **Login credentials**:
+   - Email: `velioratechworks@gmail.com`
+   - Password: `Veliora@2025`
+4. **Default features**:
    - Dashboard with analytics
    - Content management (Posts, Projects, Services)
    - Contact form submissions
    - Media library
    - User management
-   - SEO settings
 
 ## 🎨 Design System
 
@@ -151,10 +151,7 @@ The application uses PostgreSQL with the following main entities:
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
-- `npm run db:generate` - Generate Prisma client
-- `npm run db:push` - Push schema to database
-- `npm run db:migrate` - Run database migrations
-- `npm run db:studio` - Open Prisma Studio
+- `npm run firebase:seed` - Seed Firebase with initial data
 
 ### Project Structure
 ```
