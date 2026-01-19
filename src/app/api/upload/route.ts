@@ -37,11 +37,22 @@ export async function POST(request: NextRequest) {
       mimeType: file.type,
       size: file.size,
       url: result.secure_url,
-      category,
+      category: category,
+      type: file.type,
       createdAt: new Date()
     })
 
-    const media = { id: docRef.id, filename: result.public_id, originalName: file.name, mimeType: file.type, size: file.size, url: result.secure_url, category }
+    const media = { 
+      id: docRef.id, 
+      filename: result.public_id, 
+      originalName: file.name, 
+      mimeType: file.type, 
+      size: file.size, 
+      url: result.secure_url, 
+      category: category,
+      type: file.type,
+      createdAt: new Date()
+    }
 
     return NextResponse.json(media, { status: 200 })
   } catch (error) {

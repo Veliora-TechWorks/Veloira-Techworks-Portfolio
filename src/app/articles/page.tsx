@@ -7,6 +7,8 @@ import { Search, Calendar, User, ArrowRight, Tag } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
+import { formatFirebaseDate } from '@/lib/dateUtils'
+
 export default function ArticlesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
@@ -133,7 +135,7 @@ export default function ArticlesPage() {
                         </div>
                         <div className="flex items-center">
                           <Calendar className="w-4 h-4 mr-1" />
-                          {new Date(article.createdAt).toLocaleDateString()}
+                          {formatFirebaseDate(article.createdAt)}
                         </div>
                       </div>
                       <a

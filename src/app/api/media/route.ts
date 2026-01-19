@@ -7,10 +7,30 @@ export async function GET() {
       .orderBy('createdAt', 'desc')
       .get()
     
-    const media = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    const media = snapshot.docs.map((doc: any) => ({ 
+      id: doc.id, 
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt
+    }))
+    
+    console.log('Media API returning:', media.length, 'items')
     return NextResponse.json(media)
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch media' }, { status: 500 })
+    console.error('Media API error:', error)
+    // Try without orderBy if it fails
+    try {
+      const snapshot = await adminDb.collection('media').get()
+      const media = snapshot.docs.map((doc: any) => ({ 
+        id: doc.id, 
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt
+      }))
+      console.log('Media API (no order) returning:', media.length, 'items')
+      return NextResponse.json(media)
+    } catch (fallbackError) {
+      console.error('Media API fallback error:', fallbackError)
+      return NextResponse.json({ error: 'Failed to fetch media' }, { status: 500 })
+    }
   }
 }
 

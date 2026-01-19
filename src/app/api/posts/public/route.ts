@@ -7,11 +7,21 @@ export async function GET() {
       .where('isPublished', '==', true)
       .get()
     
-    const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-    // Sort by createdAt in JavaScript instead of Firestore
+    const posts = snapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        id: doc.id,
+        ...data,
+        // Convert Firebase Timestamp to serializable format
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
+        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt
+      }
+    })
+    
+    // Sort by createdAt in JavaScript
     posts.sort((a: any, b: any) => {
-      const dateA = a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000) : new Date(a.createdAt)
-      const dateB = b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000) : new Date(b.createdAt)
+      const dateA = new Date(a.createdAt)
+      const dateB = new Date(b.createdAt)
       return dateB.getTime() - dateA.getTime()
     })
     

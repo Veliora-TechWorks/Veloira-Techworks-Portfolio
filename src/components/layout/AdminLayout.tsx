@@ -28,7 +28,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Services', href: '/admin/services', icon: BarChart3 },
     { name: 'Contacts', href: '/admin/contacts', icon: MessageSquare },
     { name: 'Media', href: '/admin/media', icon: Image },
-    { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ]
 
