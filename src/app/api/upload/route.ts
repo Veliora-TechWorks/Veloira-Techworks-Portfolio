@@ -10,6 +10,12 @@ cloudinary.config({
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Cloudinary is configured
+    if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      console.error('Cloudinary configuration missing')
+      return NextResponse.json({ error: 'Upload service not configured' }, { status: 500 })
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File
     const category = formData.get('category') as string || 'general'
@@ -23,10 +29,18 @@ export async function POST(request: NextRequest) {
 
     const result: any = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        { folder: 'veliora-techworks' },
+        { 
+          folder: 'veliora-techworks',
+          resource_type: 'auto',
+          quality: 'auto:good'
+        },
         (error, result) => {
-          if (error) reject(error)
-          else resolve(result)
+          if (error) {
+            console.error('Cloudinary upload error:', error)
+            reject(error)
+          } else {
+            resolve(result)
+          }
         }
       ).end(buffer)
     })
@@ -57,6 +71,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(media, { status: 200 })
   } catch (error) {
     console.error('Upload error:', error)
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Upload failed', 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }

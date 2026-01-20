@@ -63,7 +63,7 @@ const Portfolio = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="card overflow-hidden group"
+                className="card overflow-hidden"
               >
                 {/* Project Image */}
                 <div className="relative overflow-hidden bg-gradient-to-br from-primary-100 to-accent-100 h-48 sm:h-56 md:h-64">
@@ -71,7 +71,7 @@ const Portfolio = () => {
                     <img
                       src={project.image}
                       alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover transition-transform duration-500"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -84,25 +84,7 @@ const Portfolio = () => {
                     </div>
                   )}
                   
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-dark-800/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">
-                    {project.liveUrl && (
-                      <a
-                        href={project.liveUrl}
-                        className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-200"
-                      >
-                        <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-dark-800" />
-                      </a>
-                    )}
-                    {project.githubUrl && (
-                      <a
-                        href={project.githubUrl}
-                        className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-200"
-                      >
-                        <Github className="w-4 h-4 sm:w-5 sm:h-5 text-dark-800" />
-                      </a>
-                    )}
-                  </div>
+                  {/* Overlay - Removed */}
                 </div>
 
                 {/* Project Content */}

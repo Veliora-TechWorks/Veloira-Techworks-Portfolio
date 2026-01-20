@@ -193,7 +193,7 @@ const About = () => {
         >
           <div className="max-w-4xl mx-auto text-center">
             <h3 className="text-xl sm:text-2xl md:text-3xl font-display font-semibold text-dark-800 mb-4 sm:mb-6">
-              A Message from Our CEO
+              A Message from Our Founder
             </h3>
             <blockquote className="text-base sm:text-lg md:text-xl text-dark-700 italic leading-relaxed mb-6 sm:mb-8">
               "At Veliora TechWorks, we don't just build software – we craft digital experiences 
@@ -203,10 +203,10 @@ const About = () => {
             </blockquote>
             <div className="flex items-center justify-center space-x-3 sm:space-x-4">
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-base sm:text-xl">CEO</span>
+                <span className="text-white font-bold text-base sm:text-xl">F</span>
               </div>
               <div className="text-left">
-                <div className="text-sm sm:text-base font-semibold text-dark-800">Chief Executive Officer</div>
+                <div className="text-sm sm:text-base font-semibold text-dark-800">Founder & Director</div>
                 <div className="text-xs sm:text-sm text-dark-600">Veliora TechWorks</div>
               </div>
             </div>

@@ -129,40 +129,40 @@ export default function CareersPage() {
               <Briefcase className="w-4 h-4 mr-2" />
               Join Our Growing Team
             </div>
-            <h1 className="text-5xl md:text-7xl font-display font-bold text-dark-800 mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-display font-bold text-dark-800 mb-6 leading-tight px-4">
               Build Your <span className="gradient-text">Career</span> With Us
             </h1>
-            <p className="text-xl text-dark-600 mb-10 leading-relaxed">
+            <p className="text-lg sm:text-xl text-dark-600 mb-10 leading-relaxed px-4">
               Join a team of passionate innovators who are shaping the future of technology. 
               We offer exciting opportunities, competitive benefits, and a culture of growth.
             </p>
             
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            {/* Stats Grid - Mobile/Tablet Optimized */}
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4 mb-12 px-4">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center group">
-                  <div className={`w-16 h-16 bg-gradient-to-r ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                    <stat.icon className="w-8 h-8 text-white" />
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r ${stat.color} rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                    <stat.icon className="w-5 h-5 sm:w-8 sm:h-8 text-white" />
                   </div>
-                  <div className="text-3xl font-display font-bold text-dark-800 mb-1">{stat.value}</div>
-                  <div className="text-dark-600 text-sm">{stat.label}</div>
+                  <div className="text-xl sm:text-3xl font-display font-bold text-dark-800 mb-1">{stat.value}</div>
+                  <div className="text-dark-600 text-xs sm:text-sm">{stat.label}</div>
                 </div>
               ))}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
               <a
                 href="#positions"
-                className="btn-primary inline-flex items-center space-x-2 px-8 py-4"
+                className="btn-primary inline-flex items-center justify-center space-x-2 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base"
               >
                 <span>View Open Positions</span>
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
               <a
                 href="#benefits"
-                className="btn-secondary inline-flex items-center space-x-2 px-8 py-4"
+                className="btn-secondary inline-flex items-center justify-center space-x-2 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base"
               >
-                <Heart className="w-5 h-5" />
+                <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Our Benefits</span>
               </a>
             </div>
@@ -173,16 +173,34 @@ export default function CareersPage() {
       {/* Benefits Section */}
       <section id="benefits" className="section-padding bg-white">
         <div className="container-custom">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display font-bold text-dark-800 mb-6">
+          <div className="text-center mb-12 sm:mb-16 px-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-dark-800 mb-4 sm:mb-6">
               Why Choose <span className="gradient-text">Veliora</span>?
             </h2>
-            <p className="text-xl text-dark-600 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-dark-600 max-w-3xl mx-auto">
               We believe in creating an environment where our team can thrive, grow, and make meaningful impact while enjoying exceptional benefits.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Mobile/Tablet: Stack Layout */}
+          <div className="lg:hidden space-y-4 sm:space-y-6 px-4">
+            {benefits.map((benefit, index) => (
+              <div key={index} className="bg-white rounded-xl p-5 sm:p-6 shadow-lg border border-gray-100 flex items-start space-x-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-primary-500 to-accent-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <benefit.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg sm:text-xl font-display font-bold text-dark-800 mb-2 sm:mb-3">
+                    {benefit.title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-dark-600 leading-relaxed">{benefit.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: Grid Layout */}
+          <div className="hidden lg:grid grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (
               <div key={index} className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-primary-200">
                 <div className="w-16 h-16 bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -201,21 +219,21 @@ export default function CareersPage() {
       {/* Open Positions */}
       <section id="positions" className="section-padding bg-gray-50">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-display font-bold text-dark-800 mb-6">
+          <div className="text-center mb-8 sm:mb-12 px-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-dark-800 mb-4 sm:mb-6">
               Open <span className="gradient-text">Positions</span>
             </h2>
-            <p className="text-xl text-dark-600 max-w-3xl mx-auto mb-8">
+            <p className="text-lg sm:text-xl text-dark-600 max-w-3xl mx-auto mb-6 sm:mb-8">
               Find your next opportunity and join our growing team of innovators and problem solvers.
             </p>
             
             {departments.length > 1 && (
-              <div className="flex flex-wrap justify-center gap-3 mb-8">
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
                 {departments.map((dept) => (
                   <button
                     key={dept}
                     onClick={() => setSelectedDepartment(dept)}
-                    className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                    className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium transition-all duration-300 text-sm sm:text-base ${
                       selectedDepartment === dept
                         ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-lg'
                         : 'bg-white text-dark-600 hover:bg-gray-100 border border-gray-200 hover:border-primary-300'
@@ -234,7 +252,7 @@ export default function CareersPage() {
               <p className="mt-4 text-gray-600">Loading positions...</p>
             </div>
           ) : filteredJobs.length === 0 ? (
-            <div className="text-center py-16">
+            <div className="text-center py-16 px-4">
               <Briefcase className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-600 mb-2">No Open Positions</h3>
               <p className="text-gray-500 mb-6">We don't have any open positions at the moment, but we're always looking for exceptional talent.</p>
@@ -247,44 +265,44 @@ export default function CareersPage() {
               </a>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6 px-4">
               {filteredJobs.map((job) => (
-                <div key={job.id} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-primary-200">
-                  <div className="p-8">
-                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+                <div key={job.id} className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-primary-200">
+                  <div className="p-5 sm:p-6 lg:p-8">
+                    <div className="flex flex-col gap-4 sm:gap-6">
                       <div className="flex-1">
-                        <div className="flex flex-wrap items-center gap-4 mb-4">
-                          <h3 className="text-2xl font-display font-bold text-dark-800">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4">
+                          <h3 className="text-xl sm:text-2xl font-display font-bold text-dark-800">
                             {job.title}
                           </h3>
-                          <span className="px-4 py-2 bg-gradient-to-r from-primary-100 to-accent-100 text-primary-700 rounded-full text-sm font-semibold">
+                          <span className="px-3 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-primary-100 to-accent-100 text-primary-700 rounded-full text-xs sm:text-sm font-semibold w-fit">
                             {job.department}
                           </span>
                         </div>
                         
-                        <p className="text-dark-600 mb-6 leading-relaxed">{job.description}</p>
+                        <p className="text-sm sm:text-base text-dark-600 mb-4 sm:mb-6 leading-relaxed">{job.description}</p>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                          <div className="flex items-center text-gray-600">
-                            <MapPin className="w-5 h-5 mr-3 text-primary-500" />
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                          <div className="flex items-center text-gray-600 text-sm sm:text-base">
+                            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-primary-500 flex-shrink-0" />
                             <span>{job.location}</span>
                           </div>
-                          <div className="flex items-center text-gray-600">
-                            <Clock className="w-5 h-5 mr-3 text-primary-500" />
+                          <div className="flex items-center text-gray-600 text-sm sm:text-base">
+                            <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-primary-500 flex-shrink-0" />
                             <span>{job.type}</span>
                           </div>
-                          <div className="flex items-center text-gray-600">
-                            <DollarSign className="w-5 h-5 mr-3 text-primary-500" />
+                          <div className="flex items-center text-gray-600 text-sm sm:text-base">
+                            <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-primary-500 flex-shrink-0" />
                             <span>{job.salary}</span>
                           </div>
                         </div>
                         
                         {job.requirements && job.requirements.length > 0 && (
-                          <div className="mb-6">
-                            <h4 className="font-semibold text-dark-800 mb-3">Requirements:</h4>
+                          <div className="mb-4 sm:mb-6">
+                            <h4 className="font-semibold text-dark-800 mb-2 sm:mb-3 text-sm sm:text-base">Requirements:</h4>
                             <div className="flex flex-wrap gap-2">
                               {job.requirements.map((req, reqIndex) => (
-                                <span key={reqIndex} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                                <span key={reqIndex} className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs sm:text-sm">
                                   {req}
                                 </span>
                               ))}
@@ -293,15 +311,15 @@ export default function CareersPage() {
                         )}
                       </div>
                       
-                      <div className="flex flex-col gap-3 lg:min-w-[200px]">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                         <a
                           href={`mailto:careers@veliora-techworks.com?subject=Application for ${job.title}&body=Hi, I'm interested in the ${job.title} position.`}
-                          className="btn-primary inline-flex items-center justify-center space-x-2 w-full"
+                          className="btn-primary inline-flex items-center justify-center space-x-2 flex-1 sm:flex-none sm:min-w-[140px] py-2 sm:py-3 text-sm sm:text-base"
                         >
                           <Mail className="w-4 h-4" />
                           <span>Apply Now</span>
                         </a>
-                        <button className="btn-secondary w-full">
+                        <button className="btn-secondary flex-1 sm:flex-none sm:min-w-[120px] py-2 sm:py-3 text-sm sm:text-base">
                           Learn More
                         </button>
                       </div>
@@ -318,26 +336,26 @@ export default function CareersPage() {
       <section className="section-padding bg-gradient-to-r from-primary-500 via-accent-500 to-primary-600 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="container-custom relative">
-          <div className="text-center max-w-4xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">
+          <div className="text-center max-w-4xl mx-auto px-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 sm:mb-6">
               Don't See Your Perfect Role?
             </h2>
-            <p className="text-xl mb-8 opacity-90">
+            <p className="text-lg sm:text-xl mb-6 sm:mb-8 opacity-90">
               We're always looking for exceptional talent to join our team. Send us your resume and let's explore opportunities together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="mailto:careers@veliora-techworks.com"
-                className="btn-secondary inline-flex items-center space-x-2 px-8 py-4"
+                className="btn-secondary inline-flex items-center justify-center space-x-2 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base"
               >
-                <Mail className="w-5 h-5" />
+                <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Send Your Resume</span>
               </a>
               <a
                 href="/team"
-                className="inline-flex items-center space-x-2 px-8 py-4 border-2 border-white/30 rounded-lg hover:bg-white/10 transition-all duration-300 font-medium"
+                className="inline-flex items-center justify-center space-x-2 px-6 sm:px-8 py-3 sm:py-4 border-2 border-white/30 rounded-lg hover:bg-white/10 transition-all duration-300 font-medium text-sm sm:text-base"
               >
-                <Users className="w-5 h-5" />
+                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Meet Our Team</span>
               </a>
             </div>

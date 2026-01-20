@@ -168,24 +168,40 @@ export default function PostsPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB')
+      return
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      return
+    }
+
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('category', 'blog')
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', file)
+      uploadFormData.append('category', 'blog')
 
       const res = await fetch('/api/upload', {
         method: 'POST',
-        body: formData
+        body: uploadFormData
       })
 
-      if (!res.ok) throw new Error('Upload failed')
-
       const result = await res.json()
+      
+      if (!res.ok) {
+        throw new Error(result.details || result.error || 'Upload failed')
+      }
+
       setFormData(prev => ({ ...prev, image: result.url }))
-      toast.success('Image uploaded')
-    } catch (error) {
-      toast.error('Upload failed')
+      toast.success('Image uploaded successfully')
+    } catch (error: any) {
+      console.error('Upload error:', error)
+      toast.error(error.message || 'Upload failed')
     } finally {
       setUploading(false)
     }

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { 
   Mail, 
   Phone, 
@@ -86,9 +87,13 @@ const Footer = () => {
             {/* Company Info */}
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">V</span>
-                </div>
+                <Image
+                  src="/Favicon.jpg"
+                  alt="Veliora TechWorks Logo"
+                  width={40}
+                  height={40}
+                  className="rounded-lg"
+                />
                 <Link href="/admin/login" className="font-display font-bold text-xl hover:text-primary-400 transition-colors">
                   Veliora TechWorks
                 </Link>

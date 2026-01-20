@@ -174,23 +174,38 @@ export default function ProjectsPage() {
     const files = e.target.files
     if (!files || files.length === 0) return
 
+    // Validate files
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].size > 5 * 1024 * 1024) {
+        toast.error(`File ${files[i].name} is too large. Maximum size is 5MB.`)
+        return
+      }
+      if (!files[i].type.startsWith('image/')) {
+        toast.error(`File ${files[i].name} is not an image.`)
+        return
+      }
+    }
+
     setUploading(true)
     try {
       const uploadedUrls: string[] = []
       
       for (let i = 0; i < files.length; i++) {
-        const formData = new FormData()
-        formData.append('file', files[i])
-        formData.append('category', 'portfolio')
+        const uploadFormData = new FormData()
+        uploadFormData.append('file', files[i])
+        uploadFormData.append('category', 'portfolio')
 
         const res = await fetch('/api/upload', {
           method: 'POST',
-          body: formData
+          body: uploadFormData
         })
 
-        if (!res.ok) throw new Error('Upload failed')
-
         const result = await res.json()
+        
+        if (!res.ok) {
+          throw new Error(result.details || result.error || `Upload failed for ${files[i].name}`)
+        }
+
         uploadedUrls.push(result.url)
       }
 
@@ -199,9 +214,10 @@ export default function ProjectsPage() {
         gallery: [...prev.gallery, ...uploadedUrls],
         image: prev.gallery.length === 0 ? uploadedUrls[0] : prev.image
       }))
-      toast.success(`${uploadedUrls.length} image(s) uploaded`)
-    } catch (error) {
-      toast.error('Upload failed')
+      toast.success(`${uploadedUrls.length} image(s) uploaded successfully`)
+    } catch (error: any) {
+      console.error('Upload error:', error)
+      toast.error(error.message || 'Upload failed')
     } finally {
       setUploading(false)
     }
