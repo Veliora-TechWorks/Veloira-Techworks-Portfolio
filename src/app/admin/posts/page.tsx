@@ -200,7 +200,7 @@ export default function PostsPage() {
       console.log('Upload response:', { status: res.status, result })
       
       if (!res.ok) {
-        throw new Error(result.details || result.error || 'Upload failed')
+        throw new Error(result.message || result.details || result.error || 'Upload failed')
       }
 
       setFormData(prev => ({ ...prev, image: result.url }))

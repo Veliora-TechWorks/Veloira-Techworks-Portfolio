@@ -209,7 +209,7 @@ export default function ProjectsPage() {
         console.log(`Upload ${i + 1} response:`, { status: res.status, result })
         
         if (!res.ok) {
-          throw new Error(result.details || result.error || `Upload failed for ${files[i].name}`)
+          throw new Error(result.message || result.details || result.error || `Upload failed for ${files[i].name}`)
         }
 
         uploadedUrls.push(result.url)
