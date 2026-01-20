@@ -181,11 +181,15 @@ export default function PostsPage() {
     }
 
     setUploading(true)
+    toast.loading('Uploading image...', { id: 'upload' })
+    
     try {
       const uploadFormData = new FormData()
       uploadFormData.append('file', file)
       uploadFormData.append('category', 'blog')
 
+      console.log('Starting upload for:', file.name)
+      
       const res = await fetch('/api/upload', {
         method: 'POST',
         body: uploadFormData
@@ -193,15 +197,17 @@ export default function PostsPage() {
 
       const result = await res.json()
       
+      console.log('Upload response:', { status: res.status, result })
+      
       if (!res.ok) {
         throw new Error(result.details || result.error || 'Upload failed')
       }
 
       setFormData(prev => ({ ...prev, image: result.url }))
-      toast.success('Image uploaded successfully')
+      toast.success('Image uploaded successfully', { id: 'upload' })
     } catch (error: any) {
       console.error('Upload error:', error)
-      toast.error(error.message || 'Upload failed')
+      toast.error(error.message || 'Upload failed', { id: 'upload' })
     } finally {
       setUploading(false)
     }

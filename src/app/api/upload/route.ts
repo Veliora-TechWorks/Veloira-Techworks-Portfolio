@@ -10,15 +10,41 @@ cloudinary.config({
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Upload request received')
+    
     // Check if Cloudinary is configured
-    if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      console.error('Cloudinary configuration missing')
-      return NextResponse.json({ error: 'Upload service not configured' }, { status: 500 })
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+    const apiKey = process.env.CLOUDINARY_API_KEY
+    const apiSecret = process.env.CLOUDINARY_API_SECRET
+    
+    console.log('Cloudinary config check:', {
+      cloudName: !!cloudName,
+      apiKey: !!apiKey,
+      apiSecret: !!apiSecret
+    })
+    
+    if (!cloudName || !apiKey || !apiSecret) {
+      console.error('Cloudinary configuration missing:', {
+        cloudName: !!cloudName,
+        apiKey: !!apiKey,
+        apiSecret: !!apiSecret
+      })
+      return NextResponse.json({ 
+        error: 'Upload service not configured',
+        details: 'Missing Cloudinary environment variables'
+      }, { status: 500 })
     }
 
     const formData = await request.formData()
     const file = formData.get('file') as File
     const category = formData.get('category') as string || 'general'
+
+    console.log('File received:', {
+      name: file?.name,
+      size: file?.size,
+      type: file?.type,
+      category
+    })
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -27,6 +53,8 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
+    console.log('Starting Cloudinary upload...')
+    
     const result: any = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         { 
@@ -39,12 +67,15 @@ export async function POST(request: NextRequest) {
             console.error('Cloudinary upload error:', error)
             reject(error)
           } else {
+            console.log('Cloudinary upload success:', result?.public_id)
             resolve(result)
           }
         }
       ).end(buffer)
     })
 
+    console.log('Saving to Firebase...')
+    
     const docRef = await adminDb.collection('media').add({
       filename: result.public_id,
       originalName: file.name,
@@ -68,6 +99,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date()
     }
 
+    console.log('Upload completed successfully:', media.id)
     return NextResponse.json(media, { status: 200 })
   } catch (error) {
     console.error('Upload error:', error)

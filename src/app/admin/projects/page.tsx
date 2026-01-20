@@ -187,10 +187,14 @@ export default function ProjectsPage() {
     }
 
     setUploading(true)
+    toast.loading(`Uploading ${files.length} image(s)...`, { id: 'upload' })
+    
     try {
       const uploadedUrls: string[] = []
       
       for (let i = 0; i < files.length; i++) {
+        console.log(`Uploading file ${i + 1}/${files.length}:`, files[i].name)
+        
         const uploadFormData = new FormData()
         uploadFormData.append('file', files[i])
         uploadFormData.append('category', 'portfolio')
@@ -201,6 +205,8 @@ export default function ProjectsPage() {
         })
 
         const result = await res.json()
+        
+        console.log(`Upload ${i + 1} response:`, { status: res.status, result })
         
         if (!res.ok) {
           throw new Error(result.details || result.error || `Upload failed for ${files[i].name}`)
@@ -214,10 +220,10 @@ export default function ProjectsPage() {
         gallery: [...prev.gallery, ...uploadedUrls],
         image: prev.gallery.length === 0 ? uploadedUrls[0] : prev.image
       }))
-      toast.success(`${uploadedUrls.length} image(s) uploaded successfully`)
+      toast.success(`${uploadedUrls.length} image(s) uploaded successfully`, { id: 'upload' })
     } catch (error: any) {
       console.error('Upload error:', error)
-      toast.error(error.message || 'Upload failed')
+      toast.error(error.message || 'Upload failed', { id: 'upload' })
     } finally {
       setUploading(false)
     }
