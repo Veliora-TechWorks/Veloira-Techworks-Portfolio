@@ -168,9 +168,9 @@ export default function PostsPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size must be less than 5MB')
+    // Validate file size (1MB limit for deployment)
+    if (file.size > 1 * 1024 * 1024) {
+      toast.error('File size must be less than 1MB')
       return
     }
 
@@ -181,34 +181,25 @@ export default function PostsPage() {
     }
 
     setUploading(true)
-    toast.loading('Uploading image...', { id: 'upload' })
+    toast.loading('Processing image...', { id: 'upload' })
     
     try {
-      const uploadFormData = new FormData()
-      uploadFormData.append('file', file)
-      uploadFormData.append('category', 'blog')
-
-      console.log('Starting upload for:', file.name)
-      
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: uploadFormData
-      })
-
-      const result = await res.json()
-      
-      console.log('Upload response:', { status: res.status, result })
-      
-      if (!res.ok) {
-        throw new Error(result.message || result.details || result.error || 'Upload failed')
+      // Convert to base64 directly on client
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string
+        setFormData(prev => ({ ...prev, image: dataUrl }))
+        toast.success('Image processed successfully', { id: 'upload' })
+        setUploading(false)
       }
-
-      setFormData(prev => ({ ...prev, image: result.url }))
-      toast.success('Image uploaded successfully', { id: 'upload' })
+      reader.onerror = () => {
+        toast.error('Failed to process image', { id: 'upload' })
+        setUploading(false)
+      }
+      reader.readAsDataURL(file)
     } catch (error: any) {
       console.error('Upload error:', error)
-      toast.error(error.message || 'Upload failed', { id: 'upload' })
-    } finally {
+      toast.error('Upload failed', { id: 'upload' })
       setUploading(false)
     }
   }

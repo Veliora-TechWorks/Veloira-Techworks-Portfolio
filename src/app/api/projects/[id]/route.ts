@@ -19,11 +19,19 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const data = await request.json()
-    console.log('Updating project with data:', data)
+    
+    // Validate document size to prevent Firestore limit issues
+    const dataSize = JSON.stringify(data).length
+    if (dataSize > 900000) { // 900KB limit to stay under 1MB
+      return NextResponse.json({ 
+        error: 'Document too large. Please reduce image data or use external URLs.' 
+      }, { status: 400 })
+    }
+    
+    console.log('Updating project with data size:', dataSize, 'bytes')
     await adminDb.collection('projects').doc(params.id).update({ ...data, updatedAt: new Date() })
     const updatedDoc = await adminDb.collection('projects').doc(params.id).get()
     const project = { id: updatedDoc.id, ...updatedDoc.data() }
-    console.log('Updated project:', project)
     return NextResponse.json(project)
   } catch (error) {
     console.error('Update error:', error)

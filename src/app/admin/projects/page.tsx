@@ -174,56 +174,36 @@ export default function ProjectsPage() {
     const files = e.target.files
     if (!files || files.length === 0) return
 
-    // Validate files
-    for (let i = 0; i < files.length; i++) {
-      if (files[i].size > 5 * 1024 * 1024) {
-        toast.error(`File ${files[i].name} is too large. Maximum size is 5MB.`)
-        return
-      }
-      if (!files[i].type.startsWith('image/')) {
-        toast.error(`File ${files[i].name} is not an image.`)
-        return
-      }
-    }
-
     setUploading(true)
     toast.loading(`Uploading ${files.length} image(s)...`, { id: 'upload' })
     
     try {
-      const uploadedUrls: string[] = []
+      const formData = new FormData()
+      Array.from(files).forEach(file => {
+        formData.append('files', file)
+      })
+      formData.append('category', 'portfolio')
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!res.ok) throw new Error('Upload failed')
+
+      const result = await res.json()
+      const uploadedUrls = result.files.map((file: any) => file.url)
       
-      for (let i = 0; i < files.length; i++) {
-        console.log(`Uploading file ${i + 1}/${files.length}:`, files[i].name)
-        
-        const uploadFormData = new FormData()
-        uploadFormData.append('file', files[i])
-        uploadFormData.append('category', 'portfolio')
-
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: uploadFormData
-        })
-
-        const result = await res.json()
-        
-        console.log(`Upload ${i + 1} response:`, { status: res.status, result })
-        
-        if (!res.ok) {
-          throw new Error(result.message || result.details || result.error || `Upload failed for ${files[i].name}`)
-        }
-
-        uploadedUrls.push(result.url)
-      }
-
       setFormData(prev => ({ 
         ...prev, 
         gallery: [...prev.gallery, ...uploadedUrls],
         image: prev.gallery.length === 0 ? uploadedUrls[0] : prev.image
       }))
+      
       toast.success(`${uploadedUrls.length} image(s) uploaded successfully`, { id: 'upload' })
     } catch (error: any) {
       console.error('Upload error:', error)
-      toast.error(error.message || 'Upload failed', { id: 'upload' })
+      toast.error('Upload failed', { id: 'upload' })
     } finally {
       setUploading(false)
     }

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import ImageModal from '@/components/ui/ImageModal'
 import { ExternalLink, Github, Tag, ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -13,6 +14,7 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [currentImage, setCurrentImage] = useState(0)
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     fetch(`/api/projects/${params.slug}`)
@@ -86,45 +88,53 @@ export default function ProjectDetailPage() {
               </div>
             )}
 
-            {project.gallery && project.gallery.length > 0 && (
+            {(project.gallery && project.gallery.length > 0) ? (
               <div className="mb-8">
-                <div className="relative rounded-lg overflow-hidden shadow-lg mb-4">
+                <div className="w-full cursor-pointer" onClick={() => setShowModal(true)}>
                   <img
                     src={project.gallery[currentImage]}
                     alt={`${project.title} - Image ${currentImage + 1}`}
-                    className="w-full h-auto"
+                    className="w-full h-auto rounded-lg shadow-lg"
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  {project.gallery.length > 1 && (
-                    <>
-                      <button
-                        onClick={() => setCurrentImage((currentImage - 1 + project.gallery.length) % project.gallery.length)}
-                        className="btn-outline flex items-center px-4 py-2"
-                      >
-                        <ChevronLeft className="w-5 h-5 mr-2" />
-                        Previous
-                      </button>
-                      <div className="flex gap-2">
-                        {project.gallery.map((_: any, idx: number) => (
-                          <button
-                            key={idx}
-                            onClick={() => setCurrentImage(idx)}
-                            className={`w-2 h-2 rounded-full transition-all ${
-                              idx === currentImage ? 'bg-primary-500 w-8' : 'bg-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <button
-                        onClick={() => setCurrentImage((currentImage + 1) % project.gallery.length)}
-                        className="btn-outline flex items-center px-4 py-2"
-                      >
-                        Next
-                        <ChevronRight className="w-5 h-5 ml-2" />
-                      </button>
-                    </>
-                  )}
+                {project.gallery.length > 1 && (
+                  <div className="flex items-center justify-between mt-8">
+                    <button
+                      onClick={() => setCurrentImage((currentImage - 1 + project.gallery.length) % project.gallery.length)}
+                      className="btn-outline flex items-center px-4 py-2"
+                    >
+                      <ChevronLeft className="w-5 h-5 mr-2" />
+                      Previous
+                    </button>
+                    <div className="flex gap-2">
+                      {project.gallery.map((_: any, idx: number) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCurrentImage(idx)}
+                          className={`w-2 h-2 rounded-full transition-all ${
+                            idx === currentImage ? 'bg-primary-500 w-8' : 'bg-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setCurrentImage((currentImage + 1) % project.gallery.length)}
+                      className="btn-outline flex items-center px-4 py-2"
+                    >
+                      Next
+                      <ChevronRight className="w-5 h-5 ml-2" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : project.image && (
+              <div className="mb-8">
+                <div className="w-full cursor-pointer" onClick={() => setShowModal(true)}>
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-auto rounded-lg shadow-lg"
+                  />
                 </div>
               </div>
             )}
@@ -184,7 +194,7 @@ export default function ProjectDetailPage() {
             </div>
           )}
 
-          <div className="flex flex-wrap gap-4 justify-center mb-8">
+          <div className="flex flex-wrap gap-4 justify-center mb-16">
             {project.liveUrl && (
               <a
                 href={project.liveUrl}
@@ -212,6 +222,23 @@ export default function ProjectDetailPage() {
       </section>
 
       <Footer />
+      
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        images={project?.gallery || (project?.image ? [project.image] : [])}
+        currentIndex={currentImage}
+        onPrevious={() => {
+          const images = project?.gallery || (project?.image ? [project.image] : [])
+          setCurrentImage((currentImage - 1 + images.length) % images.length)
+        }}
+        onNext={() => {
+          const images = project?.gallery || (project?.image ? [project.image] : [])
+          setCurrentImage((currentImage + 1) % images.length)
+        }}
+        title={project?.title}
+      />
     </main>
   )
 }

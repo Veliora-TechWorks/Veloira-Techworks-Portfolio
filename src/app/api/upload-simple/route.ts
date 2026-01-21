@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(media, { status: 200 })
   } catch (error) {
     console.error('Simple upload error:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Upload processing failed'
+    const errorMessage = error instanceof Error ? error.message : String(error) || 'Upload processing failed'
     return NextResponse.json({ 
       error: 'Upload failed', 
       details: errorMessage,

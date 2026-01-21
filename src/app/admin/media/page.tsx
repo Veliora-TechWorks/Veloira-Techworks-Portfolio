@@ -1,6 +1,8 @@
 'use client'
 
 import AdminLayout from '@/components/layout/AdminLayout'
+import FileDropzone from '@/components/ui/FileDropzone'
+import UploadProgress from '@/components/ui/UploadProgress'
 import { Upload, Search, Image as ImageIcon, Trash2, Edit, Copy } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { uploadToCloudinary } from '@/lib/cloudinary'
@@ -24,6 +26,8 @@ export default function MediaPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editCategory, setEditCategory] = useState('')
+  const [showDropzone, setShowDropzone] = useState(false)
+  const [uploadingFiles, setUploadingFiles] = useState<File[]>([])
 
   const categories = ['all', 'hero', 'about', 'portfolio', 'blog', 'team', 'culture', 'general']
 
@@ -45,9 +49,8 @@ export default function MediaPage() {
     }
   }
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleFilesSelected = async (files: File[]) => {
+    if (files.length === 0) return
 
     if (selectedCategory === 'all') {
       toast.error('Please select a specific category first')
@@ -55,12 +58,16 @@ export default function MediaPage() {
     }
 
     setUploading(true)
+    setUploadingFiles(files)
+    
     try {
       const formData = new FormData()
-      formData.append('file', file)
+      files.forEach(file => {
+        formData.append('files', file)
+      })
       formData.append('category', selectedCategory)
 
-      console.log('Uploading to category:', selectedCategory)
+      console.log(`Uploading ${files.length} files to category:`, selectedCategory)
 
       const res = await fetch('/api/upload', {
         method: 'POST',
@@ -72,18 +79,20 @@ export default function MediaPage() {
       const result = await res.json()
       console.log('Upload result:', result)
       
-      // Add the new media to state immediately
-      setMedia(prev => [...prev, result])
+      // Add the new media files to state immediately
+      if (result.files) {
+        setMedia(prev => [...prev, ...result.files])
+        toast.success(`${result.count} files uploaded to ${selectedCategory} category!`)
+      }
       
-      toast.success(`File uploaded to ${selectedCategory} category!`)
       await fetchMedia()
-      // Reset file input
-      e.target.value = ''
+      setShowDropzone(false)
     } catch (error) {
       console.error('Upload error:', error)
       toast.error('Upload failed')
     } finally {
       setUploading(false)
+      setUploadingFiles([])
     }
   }
 
@@ -132,6 +141,10 @@ export default function MediaPage() {
 
   return (
     <AdminLayout>
+      <UploadProgress 
+        isUploading={uploading} 
+        filesCount={uploadingFiles.length}
+      />
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -141,19 +154,16 @@ export default function MediaPage() {
               <p className="text-sm text-primary-500 mt-1">Uploading to: {selectedCategory}</p>
             )}
           </div>
-          <label className={`btn-primary flex items-center space-x-2 cursor-pointer ${
-            selectedCategory === 'all' ? 'opacity-50 cursor-not-allowed' : ''
-          }`}>
+          <button
+            onClick={() => setShowDropzone(!showDropzone)}
+            disabled={selectedCategory === 'all'}
+            className={`btn-primary flex items-center space-x-2 ${
+              selectedCategory === 'all' ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
             <Upload className="w-5 h-5" />
-            <span>{uploading ? 'Uploading...' : 'Upload'}</span>
-            <input
-              type="file"
-              onChange={handleFileUpload}
-              disabled={uploading || selectedCategory === 'all'}
-              className="hidden"
-              accept="image/*"
-            />
-          </label>
+            <span>{uploading ? 'Uploading...' : showDropzone ? 'Hide Upload' : 'Upload Images'}</span>
+          </button>
         </div>
 
         <div className="flex gap-2 flex-wrap">
@@ -172,11 +182,13 @@ export default function MediaPage() {
           ))}
         </div>
 
-        {selectedCategory === 'all' && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <p className="text-yellow-800 text-sm">
-              📌 Select a specific category above to upload images to that category
-            </p>
+        {showDropzone && selectedCategory !== 'all' && (
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <FileDropzone
+              onFilesSelected={handleFilesSelected}
+              disabled={uploading}
+              multiple={true}
+            />
           </div>
         )}
 

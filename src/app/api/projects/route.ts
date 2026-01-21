@@ -21,7 +21,16 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json()
-    console.log('Creating project with data:', data)
+    
+    // Validate document size to prevent Firestore limit issues
+    const dataSize = JSON.stringify(data).length
+    if (dataSize > 900000) { // 900KB limit to stay under 1MB
+      return NextResponse.json({ 
+        error: 'Document too large. Please reduce image data or use external URLs.' 
+      }, { status: 400 })
+    }
+    
+    console.log('Creating project with data size:', dataSize, 'bytes')
     const projectData = {
       ...data,
       createdAt: new Date(),
@@ -30,7 +39,6 @@ export async function POST(request: Request) {
     }
     const docRef = await adminDb.collection('projects').add(projectData)
     const project = { id: docRef.id, ...projectData }
-    console.log('Created project:', project)
     return NextResponse.json(project)
   } catch (error) {
     console.error('Create project error:', error)
