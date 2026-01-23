@@ -168,38 +168,30 @@ export default function PostsPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Validate file size (1MB limit for deployment)
-    if (file.size > 1 * 1024 * 1024) {
-      toast.error('File size must be less than 1MB')
-      return
-    }
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file')
-      return
-    }
-
     setUploading(true)
-    toast.loading('Processing image...', { id: 'upload' })
+    toast.loading('Uploading image...', { id: 'upload' })
     
     try {
-      // Convert to base64 directly on client
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result as string
-        setFormData(prev => ({ ...prev, image: dataUrl }))
-        toast.success('Image processed successfully', { id: 'upload' })
-        setUploading(false)
-      }
-      reader.onerror = () => {
-        toast.error('Failed to process image', { id: 'upload' })
-        setUploading(false)
-      }
-      reader.readAsDataURL(file)
+      const formData = new FormData()
+      formData.append('files', file)
+      formData.append('category', 'blog')
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!res.ok) throw new Error('Upload failed')
+
+      const result = await res.json()
+      const imageUrl = result.files[0].url
+      
+      setFormData(prev => ({ ...prev, image: imageUrl }))
+      toast.success('Image uploaded successfully', { id: 'upload' })
     } catch (error: any) {
       console.error('Upload error:', error)
       toast.error('Upload failed', { id: 'upload' })
+    } finally {
       setUploading(false)
     }
   }

@@ -34,10 +34,18 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json()
-    console.log('Creating post with data:', data)
+    
+    // Validate document size to prevent Firestore limit issues
+    const dataSize = JSON.stringify(data).length
+    if (dataSize > 900000) { // 900KB limit to stay under 1MB
+      return NextResponse.json({ 
+        error: 'Document too large. Please use external image URLs instead of base64 data.' 
+      }, { status: 400 })
+    }
+    
+    console.log('Creating post with data size:', dataSize, 'bytes')
     const docRef = await adminDb.collection('posts').add({ ...data, createdAt: new Date() })
     const post = { id: docRef.id, ...data }
-    console.log('Created post:', post)
     return NextResponse.json(post)
   } catch (error) {
     console.error('Create post error:', error)

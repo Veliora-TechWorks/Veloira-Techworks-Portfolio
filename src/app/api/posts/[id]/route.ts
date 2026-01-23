@@ -17,6 +17,15 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const data = await request.json()
+    
+    // Validate document size to prevent Firestore limit issues
+    const dataSize = JSON.stringify(data).length
+    if (dataSize > 900000) { // 900KB limit to stay under 1MB
+      return NextResponse.json({ 
+        error: 'Document too large. Please use external image URLs instead of base64 data.' 
+      }, { status: 400 })
+    }
+    
     await adminDb.collection('posts').doc(params.id).update({ ...data, updatedAt: new Date() })
     const updatedDoc = await adminDb.collection('posts').doc(params.id).get()
     const post = { id: updatedDoc.id, ...updatedDoc.data() }
