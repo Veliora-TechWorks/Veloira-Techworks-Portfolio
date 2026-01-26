@@ -187,4 +187,4 @@ For support, email support@veliora-techworks.com or create an issue in the repos
 
 ---
 
-**Veliora TechWorks** - Building intelligent, scalable digital solutions that empower businesses to grow and lead with confidence.
+**Veliora TechWorks 2026** - Building intelligent, scalable digital solutions that empower businesses to grow and lead with confidence.
