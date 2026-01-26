@@ -4,7 +4,14 @@ const nextConfig = {
     appDir: true,
   },
   images: {
-    domains: ['localhost', 'res.cloudinary.com', 'dh7asuhkg.cloudinary.com', 'storage.googleapis.com'],
+    domains: [
+      'localhost', 
+      'res.cloudinary.com', 
+      'dh7asuhkg.cloudinary.com',
+      'storage.googleapis.com',
+      'velioratechworksportfolio.firebasestorage.app'
+    ],
+    unoptimized: process.env.NODE_ENV === 'development'
   },
   env: {
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
