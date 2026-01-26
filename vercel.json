@@ -4,9 +4,7 @@
       "maxDuration": 30
     }
   },
-  "env": {
-    "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "@cloudinary-cloud-name",
-    "CLOUDINARY_API_KEY": "@cloudinary-api-key", 
-    "CLOUDINARY_API_SECRET": "@cloudinary-api-secret"
-  }
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs"
 }
