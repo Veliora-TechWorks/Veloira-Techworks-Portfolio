@@ -43,18 +43,18 @@ export default function BlogPage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="pt-32 pb-16 bg-gradient-to-br from-gray-50 to-white">
+      <section className="pt-24 pb-12 bg-gradient-to-br from-gray-50 to-white">
         <div className="container-custom">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-display font-bold text-dark-800 mb-6">
+            <h1 className="text-4xl md:text-6xl font-display font-bold text-dark-800 mb-4">
               Insights & <span className="gradient-text">Innovation</span>
             </h1>
-            <p className="text-xl text-dark-600 mb-8">
+            <p className="text-xl text-dark-600 mb-6">
               Stay updated with the latest trends, best practices, and insights from our technology experts.
             </p>
             
             {/* Search */}
-            <div className="relative max-w-md mx-auto mb-8">
+            <div className="relative max-w-md mx-auto mb-6">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
@@ -86,7 +86,7 @@ export default function BlogPage() {
       </section>
 
       {/* Blog Posts */}
-      <section className="section-padding bg-white">
+      <section className="py-12 bg-white">
         <div className="container-custom">
           {loading ? (
             <div className="text-center py-12">Loading posts...</div>

@@ -26,7 +26,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       }, { status: 400 })
     }
     
-    await adminDb.collection('posts').doc(params.id).update({ ...data, updatedAt: new Date() })
+    const updateData = {
+      ...data,
+      updatedAt: new Date()
+    }
+    // Only update createdAt if it's provided and different
+    if (data.createdAt) {
+      updateData.createdAt = new Date(data.createdAt)
+    }
+    
+    await adminDb.collection('posts').doc(params.id).update(updateData)
     const updatedDoc = await adminDb.collection('posts').doc(params.id).get()
     const post = { id: updatedDoc.id, ...updatedDoc.data() }
     return NextResponse.json(post)

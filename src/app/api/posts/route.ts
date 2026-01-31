@@ -44,8 +44,12 @@ export async function POST(request: Request) {
     }
     
     console.log('Creating post with data size:', dataSize, 'bytes')
-    const docRef = await adminDb.collection('posts').add({ ...data, createdAt: new Date() })
-    const post = { id: docRef.id, ...data }
+    const postData = {
+      ...data,
+      createdAt: data.createdAt ? new Date(data.createdAt) : new Date()
+    }
+    const docRef = await adminDb.collection('posts').add(postData)
+    const post = { id: docRef.id, ...postData }
     return NextResponse.json(post)
   } catch (error) {
     console.error('Create post error:', error)
