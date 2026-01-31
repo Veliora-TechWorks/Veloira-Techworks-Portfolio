@@ -153,7 +153,7 @@ export default function AdminDashboard() {
 
     setUploading(true)
     const formData = new FormData()
-    formData.append('file', file)
+    formData.append('files', file)
     formData.append('category', 'team')
 
     try {
@@ -161,10 +161,18 @@ export default function AdminDashboard() {
         method: 'POST',
         body: formData
       })
+      
+      if (!res.ok) {
+        throw new Error(`Upload failed: ${res.status}`)
+      }
+      
       const data = await res.json()
-      setTeamFormData({ ...teamFormData, image: data.url })
+      if (data.files && data.files[0]) {
+        setTeamFormData({ ...teamFormData, image: data.files[0].url })
+      }
     } catch (error) {
       console.error('Upload error:', error)
+      alert('Upload failed. Please try again.')
     } finally {
       setUploading(false)
     }
