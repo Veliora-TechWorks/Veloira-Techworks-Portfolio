@@ -74,10 +74,12 @@ export default function MediaPage() {
         body: formData,
       })
 
-      if (!res.ok) throw new Error('Upload failed')
-
       const result = await res.json()
-      console.log('Upload result:', result)
+      console.log('Upload response:', result)
+
+      if (!res.ok) {
+        throw new Error(result.details || result.error || 'Upload failed')
+      }
       
       // Add the new media files to state immediately
       if (result.files) {
@@ -89,7 +91,8 @@ export default function MediaPage() {
       setShowDropzone(false)
     } catch (error) {
       console.error('Upload error:', error)
-      toast.error('Upload failed')
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed'
+      toast.error(`Upload failed: ${errorMessage}`)
     } finally {
       setUploading(false)
       setUploadingFiles([])

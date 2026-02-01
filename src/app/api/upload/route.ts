@@ -22,62 +22,74 @@ export async function POST(request: NextRequest) {
 
     console.log(`Processing ${files.length} files for category: ${category}`)
 
+    // Check Cloudinary configuration
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
     const apiKey = process.env.CLOUDINARY_API_KEY
     const apiSecret = process.env.CLOUDINARY_API_SECRET
     
     if (!cloudName || !apiKey || !apiSecret) {
+      console.error('Cloudinary configuration missing')
       return NextResponse.json({ 
-        error: 'Cloudinary configuration missing',
-        details: 'Please check environment variables'
+        error: 'Upload service not configured',
+        details: 'Missing Cloudinary credentials'
       }, { status: 500 })
     }
     
-    const uploadPromises = files.map(async (file) => {
-      const bytes = await file.arrayBuffer()
-      const buffer = Buffer.from(bytes)
+    const uploadPromises = files.map(async (file, index) => {
+      try {
+        console.log(`Processing file ${index + 1}/${files.length}: ${file.name}`)
+        
+        const bytes = await file.arrayBuffer()
+        const buffer = Buffer.from(bytes)
 
-      const result: any = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          { 
-            folder: 'veliora-techworks',
-            resource_type: 'auto',
-            quality: 'auto:good'
-          },
-          (error, result) => {
-            if (error) {
-              console.error('Cloudinary upload error:', error)
-              reject(new Error(`Cloudinary error: ${error.message}`))
-            } else {
-              console.log('Cloudinary upload success:', result?.public_id)
-              resolve(result)
+        const result: any = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { 
+              folder: 'veliora-techworks',
+              resource_type: 'auto',
+              quality: 'auto:good',
+              timeout: 60000 // 60 second timeout
+            },
+            (error, result) => {
+              if (error) {
+                console.error(`Cloudinary upload error for ${file.name}:`, error)
+                reject(new Error(`Cloudinary error: ${error.message}`))
+              } else {
+                console.log(`Cloudinary upload success for ${file.name}:`, result?.public_id)
+                resolve(result)
+              }
             }
-          }
-        ).end(buffer)
-      })
+          )
+          uploadStream.end(buffer)
+        })
 
-      const docRef = await adminDb.collection('media').add({
-        filename: result.public_id,
-        originalName: file.name,
-        mimeType: file.type,
-        size: file.size,
-        url: result.secure_url,
-        category: category,
-        type: file.type,
-        uploadMethod: 'cloudinary',
-        createdAt: new Date()
-      })
+        // Save to Firestore
+        const docRef = await adminDb.collection('media').add({
+          filename: result.public_id,
+          originalName: file.name,
+          mimeType: file.type,
+          size: file.size,
+          url: result.secure_url,
+          category: category,
+          type: file.type,
+          uploadMethod: 'cloudinary',
+          createdAt: new Date()
+        })
 
-      return { 
-        id: docRef.id, 
-        filename: result.public_id, 
-        originalName: file.name, 
-        mimeType: file.type, 
-        size: file.size, 
-        url: result.secure_url, 
-        category: category,
-        type: file.type,
-        createdAt: new Date()
+        return { 
+          id: docRef.id, 
+          filename: result.public_id, 
+          originalName: file.name, 
+          mimeType: file.type, 
+          size: file.size, 
+          url: result.secure_url, 
+          category: category,
+          type: file.type,
+          createdAt: new Date()
+        }
+      } catch (fileError) {
+        console.error(`Error processing file ${file.name}:`, fileError)
+        throw new Error(`Failed to upload ${file.name}: ${fileError instanceof Error ? fileError.message : 'Unknown error'}`)
       }
     })
 
@@ -94,7 +106,8 @@ export async function POST(request: NextRequest) {
     console.error('Upload error:', error)
     return NextResponse.json({ 
       error: 'Upload failed', 
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
     }, { status: 500 })
   }
 }

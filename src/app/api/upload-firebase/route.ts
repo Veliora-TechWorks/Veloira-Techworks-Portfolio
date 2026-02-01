@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { adminDb } from '@/lib/firebase-admin'
-import { getStorage } from 'firebase-admin/storage'
+import { adminDb, adminStorage } from '@/lib/firebase-admin'
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`Processing ${files.length} files for category: ${category}`)
 
-    const bucket = getStorage().bucket()
+    const bucket = adminStorage.bucket()
     
     const uploadPromises = files.map(async (file) => {
       try {
