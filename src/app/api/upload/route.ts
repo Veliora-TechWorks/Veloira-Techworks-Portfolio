@@ -68,12 +68,18 @@ export async function POST(request: NextRequest) {
               folder: 'veliora-techworks',
               resource_type: 'auto',
               quality: 'auto:good',
-              timeout: 60000 // 60 second timeout
+              timeout: 60000,
+              use_filename: true,
+              unique_filename: false
             },
             (error, result) => {
               if (error) {
-                console.error(`Cloudinary upload error for ${file.name}:`, error)
-                reject(new Error(`Cloudinary error: ${error.message}`))
+                console.error(`Cloudinary upload error for ${file.name}:`, {
+                  message: error.message,
+                  http_code: error.http_code,
+                  name: error.name
+                })
+                reject(error)
               } else {
                 console.log(`Cloudinary upload success for ${file.name}:`, result?.public_id)
                 resolve(result)
@@ -107,9 +113,14 @@ export async function POST(request: NextRequest) {
           type: file.type,
           createdAt: new Date()
         }
-      } catch (fileError) {
-        console.error(`Error processing file ${file.name}:`, fileError)
-        throw new Error(`Failed to upload ${file.name}: ${fileError instanceof Error ? fileError.message : 'Unknown error'}`)
+      } catch (fileError: any) {
+        console.error(`Error processing file ${file.name}:`, {
+          message: fileError.message,
+          http_code: fileError.http_code,
+          name: fileError.name,
+          stack: fileError.stack
+        })
+        throw new Error(`Failed to upload ${file.name}: ${fileError.message || 'Unknown error'}`)
       }
     })
 
@@ -122,11 +133,15 @@ export async function POST(request: NextRequest) {
       count: uploadedFiles.length,
       method: 'cloudinary'
     }, { status: 200 })
-  } catch (error) {
-    console.error('Upload error:', error)
+  } catch (error: any) {
+    console.error('Upload error:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
     return NextResponse.json({ 
       error: 'Upload failed', 
-      details: error instanceof Error ? error.message : 'Unknown error',
+      details: error.message || 'Unknown error',
       timestamp: new Date().toISOString()
     }, { status: 500 })
   }
