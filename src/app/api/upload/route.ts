@@ -11,6 +11,11 @@ cloudinary.config({
 export async function POST(request: NextRequest) {
   try {
     console.log('Upload request received')
+    console.log('Environment check:', {
+      cloudName: !!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+      apiKey: !!process.env.CLOUDINARY_API_KEY,
+      apiSecret: !!process.env.CLOUDINARY_API_SECRET
+    })
     
     const formData = await request.formData()
     const files = formData.getAll('files') as File[]
@@ -27,11 +32,26 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.CLOUDINARY_API_KEY
     const apiSecret = process.env.CLOUDINARY_API_SECRET
     
+    console.log('Cloudinary config values:', {
+      cloudName: cloudName?.substring(0, 5) + '...',
+      apiKey: apiKey?.substring(0, 5) + '...',
+      apiSecret: apiSecret ? 'present' : 'missing'
+    })
+    
     if (!cloudName || !apiKey || !apiSecret) {
-      console.error('Cloudinary configuration missing')
+      console.error('Cloudinary configuration missing:', {
+        cloudName: !!cloudName,
+        apiKey: !!apiKey,
+        apiSecret: !!apiSecret
+      })
       return NextResponse.json({ 
         error: 'Upload service not configured',
-        details: 'Missing Cloudinary credentials'
+        details: 'Missing Cloudinary credentials',
+        config: {
+          cloudName: !!cloudName,
+          apiKey: !!apiKey,
+          apiSecret: !!apiSecret
+        }
       }, { status: 500 })
     }
     

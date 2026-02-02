@@ -4,7 +4,7 @@ const nextConfig = {
     domains: [
       'localhost', 
       'res.cloudinary.com', 
-      'dh7asuhkg.cloudinary.com',
+      'dpd4keszz.cloudinary.com',
       'storage.googleapis.com',
       'velioratechworksportfolio.firebasestorage.app'
     ],
