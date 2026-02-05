@@ -50,7 +50,7 @@ A premium, multi-page company portfolio website with a secure admin dashboard fo
    # Firebase configuration is already set up
    # Just ensure your Firebase project is properly configured
    NEXTAUTH_SECRET="your-secret-key-here"
-   NEXTAUTH_URL="http://localhost:3000"
+   NEXTAUTH_URL="http://localhost:3001"
    JWT_SECRET="your-jwt-secret-here"
    ```
 
@@ -66,7 +66,7 @@ A premium, multi-page company portfolio website with a secure admin dashboard fo
    ```
 
 6. **Open your browser**
-   Navigate to `http://localhost:3000`
+   Navigate to `http://localhost:3001`
 
 ## 🗄️ Database Schema
 

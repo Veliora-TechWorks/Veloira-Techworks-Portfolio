@@ -6,10 +6,13 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
 const About = () => {
+  const [mounted, setMounted] = useState(false)
   const [aboutImage, setAboutImage] = useState<string | null>(null)
   const [stats, setStats] = useState({ projects: 0, articles: 0 })
 
   useEffect(() => {
+    setMounted(true)
+    
     fetch('/api/media/category/about')
       .then(res => res.json())
       .then(data => {
@@ -22,6 +25,7 @@ const About = () => {
       .then(data => setStats({ projects: data.projects, articles: data.articles }))
       .catch(() => {})
   }, [])
+  
   const values = [
     {
       icon: Target,
@@ -44,6 +48,71 @@ const About = () => {
       description: 'We deliver premium solutions with meticulous attention to detail and industry best practices.'
     }
   ]
+
+  // Prevent hydration mismatch by not rendering animations until mounted
+  if (!mounted) {
+    return (
+      <section id="about" className="section-padding bg-white">
+        <div className="container-custom">
+          {/* Section Header */}
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-dark-800 mb-4 sm:mb-6 px-4">
+              About <span className="gradient-text">Veliora TechWorks</span>
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-dark-600 max-w-3xl mx-auto px-4">
+              Founded in 2026, we are a premium technology startup dedicated to building 
+              the future of digital solutions.
+            </p>
+          </div>
+
+          {/* Main Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center mb-12 sm:mb-16 lg:mb-20">
+            {/* Content */}
+            <div className="px-4">
+              <h3 className="text-2xl sm:text-3xl font-display font-semibold text-dark-800 mb-4 sm:mb-6">
+                Building Tomorrow's Technology Today
+              </h3>
+              <p className="text-base sm:text-lg text-dark-600 mb-4 sm:mb-6 leading-relaxed">
+                At Veliora TechWorks, we believe that technology should be a catalyst for growth, 
+                not a barrier. Our team of expert developers, designers, and strategists work 
+                together to create solutions that are not just functional, but transformational.
+              </p>
+              <p className="text-base sm:text-lg text-dark-600 mb-6 sm:mb-8 leading-relaxed">
+                Since our launch in 2026, we've been at the forefront of technological innovation, 
+                helping businesses across industries leverage the power of modern technology to 
+                achieve their goals and exceed their expectations.
+              </p>
+              
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                <div>
+                  <div className="text-2xl sm:text-3xl font-bold text-primary-500 mb-1 sm:mb-2">0+</div>
+                  <div className="text-sm sm:text-base text-dark-600">Projects Completed</div>
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-bold text-primary-500 mb-1 sm:mb-2">0+</div>
+                  <div className="text-sm sm:text-base text-dark-600">Articles Published</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Image */}
+            <div className="relative px-4">
+              <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary-100 to-accent-100">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-4xl sm:text-6xl font-display font-bold text-primary-500 mb-2 sm:mb-4">VTW</div>
+                    <p className="text-sm sm:text-base text-dark-600 px-4">Upload image in Admin → Media</p>
+                    <p className="text-xs sm:text-sm text-dark-500 mt-2">Category: about</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section id="about" className="section-padding bg-white">

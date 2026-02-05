@@ -7,11 +7,14 @@ import { Menu, X, ChevronDown, LogOut } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const Header = () => {
+  const [mounted, setMounted] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+    
     const handleScroll = () => {
       setScrolled(window.scrollY > 50)
     }
@@ -41,6 +44,49 @@ const Header = () => {
     { name: 'Articles', href: '/articles' },
     { name: 'Contact', href: '/contact' },
   ]
+
+  // Prevent hydration mismatch by not rendering dynamic content until mounted
+  if (!mounted) {
+    return (
+      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-transparent">
+        <nav className="container-custom">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-2">
+              <Image
+                src="/Favicon.jpg"
+                alt="Veliora TechWorks Logo"
+                width={40}
+                height={40}
+                className="rounded-lg"
+              />
+              <span className="font-display font-bold text-xl text-dark-800">
+                Veliora TechWorks
+              </span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="text-dark-700 hover:text-primary-500 font-medium transition-colors duration-200"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button className="md:hidden p-2 text-dark-800">
+              <Menu size={24} />
+            </button>
+          </div>
+        </nav>
+      </header>
+    )
+  }
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${

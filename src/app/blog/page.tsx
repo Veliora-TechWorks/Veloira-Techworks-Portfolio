@@ -1,42 +1,103 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Search, Calendar, User, ArrowRight } from 'lucide-react'
+import Image from 'next/image'
+import { formatFirebaseDate } from '@/lib/dateUtils'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import { Search, Calendar, User, ArrowRight, Tag } from 'lucide-react'
-import Link from 'next/link'
-import Image from 'next/image'
-
-import { formatFirebaseDate } from '@/lib/dateUtils'
 
 export default function BlogPage() {
+  const [mounted, setMounted] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [posts, setPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/posts/public')
-      .then(res => res.json())
-      .then(data => {
-        console.log('Public posts:', data)
-        setPosts(data)
-        setLoading(false)
-      })
-      .catch((error) => {
-        console.error('Fetch error:', error)
-        setLoading(false)
-      })
+    setMounted(true)
+    
+    // Add a small delay to prioritize above-the-fold content
+    const timer = setTimeout(() => {
+      fetch('/api/posts/public')
+        .then(res => res.json())
+        .then(data => {
+          console.log('Public posts:', data)
+          setPosts(data.slice(0, 12)) // Limit to 12 posts for performance
+          setLoading(false)
+        })
+        .catch((error) => {
+          console.error('Fetch error:', error)
+          setLoading(false)
+        })
+    }, 100)
+
+    return () => clearTimeout(timer)
   }, [])
 
   const categories = ['All', ...Array.from(new Set(posts.map(p => p.category)))]
 
   const filteredPosts = posts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory
     return matchesSearch && matchesCategory
   })
+
+  // Prevent hydration mismatch by not rendering dynamic content until mounted
+  if (!mounted) {
+    return (
+      <main>
+        <Header />
+        
+        {/* Hero Section */}
+        <section className="pt-24 pb-12 bg-gradient-to-br from-gray-50 to-white">
+          <div className="container-custom">
+            <div className="text-center max-w-4xl mx-auto">
+              <h1 className="text-4xl md:text-6xl font-display font-bold text-dark-800 mb-4">
+                Insights & <span className="gradient-text">Innovation</span>
+              </h1>
+              <p className="text-xl text-dark-600 mb-6">
+                Stay updated with the latest trends, best practices, and insights from our technology experts.
+              </p>
+              
+              {/* Search */}
+              <div className="relative max-w-md mx-auto mb-6">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search articles..."
+                  value=""
+                  onChange={() => {}}
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Categories */}
+              <div className="flex flex-wrap justify-center gap-3">
+                <button
+                  className="px-4 py-2 rounded-full font-medium transition-all duration-300 bg-primary-500 text-white"
+                >
+                  All
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Blog Posts */}
+        <section className="py-12 bg-white">
+          <div className="container-custom">
+            <div className="text-center py-12">
+              <p className="text-dark-600 text-lg">Loading articles...</p>
+            </div>
+          </div>
+        </section>
+
+        <Footer />
+      </main>
+    )
+  }
 
   return (
     <main>
@@ -89,7 +150,22 @@ export default function BlogPage() {
       <section className="py-12 bg-white">
         <div className="container-custom">
           {loading ? (
-            <div className="text-center py-12">Loading posts...</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="card overflow-hidden animate-pulse">
+                  <div className="h-48 bg-gray-200"></div>
+                  <div className="p-6">
+                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded mb-3"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
+                    <div className="flex justify-between">
+                      <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                      <div className="h-4 w-16 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : filteredPosts.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-dark-600 text-lg">No published articles yet.</p>
@@ -107,14 +183,15 @@ export default function BlogPage() {
                         alt={post.title}
                         fill
                         className="object-cover"
-                        unoptimized
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        loading="lazy"
                       />
                     ) : (
                       <>
                         <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-accent-500/20"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="text-3xl font-display font-bold text-white/30">
-                            {post.title.split(' ').slice(0, 2).map((word: string) => word[0]).join('')}
+                            {post.title?.split(' ').slice(0, 2).map((word: string) => word[0]).join('')}
                           </div>
                         </div>
                       </>
@@ -128,7 +205,7 @@ export default function BlogPage() {
                       <span className="text-sm font-medium text-primary-500 bg-primary-50 px-3 py-1 rounded-full">
                         {post.category}
                       </span>
-                      <span className="text-sm text-gray-500">{post.readTime} min read</span>
+                      <span className="text-sm text-gray-500">{post.readTime || 5} min read</span>
                     </div>
 
                     {/* Title */}

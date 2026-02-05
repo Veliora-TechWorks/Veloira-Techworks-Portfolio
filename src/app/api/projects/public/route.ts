@@ -3,20 +3,41 @@ import { adminDb } from '@/lib/firebase-admin'
 
 export async function GET() {
   try {
+    console.log('Fetching public projects...')
+    
     const snapshot = await adminDb.collection('projects').get()
-    const projects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-    // Filter active projects and sort in JavaScript
-    const activeProjects = projects
-      .filter((project: any) => project.isActive !== false) // Show if isActive is true or undefined
-      .sort((a: any, b: any) => {
-        const dateA = a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000) : new Date(a.createdAt)
-        const dateB = b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000) : new Date(b.createdAt)
-        return dateB.getTime() - dateA.getTime()
-      })
+    
+    console.log(`Found ${snapshot.docs.length} total projects in database`)
+    
+    const allProjects = snapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        id: doc.id,
+        ...data,
+        // Convert Firebase Timestamp to serializable format
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
+        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt
+      }
+    })
+    
+    // Filter active projects (show if isActive is true or undefined)
+    const activeProjects = allProjects.filter((project: any) => {
+      console.log(`Project "${project.title}": isActive = ${project.isActive}`)
+      return project.isActive !== false
+    })
+    
+    console.log(`Found ${activeProjects.length} active projects`)
+    
+    // Sort by createdAt
+    activeProjects.sort((a: any, b: any) => {
+      const dateA = new Date(a.createdAt)
+      const dateB = new Date(b.createdAt)
+      return dateB.getTime() - dateA.getTime()
+    })
     
     return NextResponse.json(activeProjects)
   } catch (error) {
-    console.error('Projects API error:', error)
+    console.error('Projects public API error:', error)
     return NextResponse.json([], { status: 200 })
   }
 }

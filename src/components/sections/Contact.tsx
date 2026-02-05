@@ -2,10 +2,11 @@
 
 import { motion } from 'framer-motion'
 import { Mail, Phone, MapPin, Send } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 
 const Contact = () => {
+  const [mounted, setMounted] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -15,6 +16,10 @@ const Contact = () => {
     message: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -76,6 +81,52 @@ const Contact = () => {
       link: '#'
     }
   ]
+
+  // Prevent hydration mismatch by not rendering animations until mounted
+  if (!mounted) {
+    return (
+      <section id="contact" className="section-padding bg-gray-50">
+        <div className="container-custom">
+          {/* Section Header */}
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-dark-800 mb-4 sm:mb-6 px-4">
+              Get In <span className="gradient-text">Touch</span>
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-dark-600 max-w-3xl mx-auto px-4">
+              Ready to transform your business with cutting-edge technology? 
+              Let's discuss your project and bring your vision to life.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 px-4">
+            {/* Contact Form */}
+            <div className="card p-6 sm:p-8">
+              <h3 className="text-xl sm:text-2xl font-display font-semibold text-dark-800 mb-4 sm:mb-6">
+                Send us a message
+              </h3>
+              <div className="text-center py-8">
+                <p className="text-dark-600">Loading contact form...</p>
+              </div>
+            </div>
+
+            {/* Contact Info */}
+            <div className="space-y-6 sm:space-y-8">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-display font-semibold text-dark-800 mb-4 sm:mb-6">
+                  Let's start a conversation
+                </h3>
+                <p className="text-base sm:text-lg text-dark-600 leading-relaxed mb-6 sm:mb-8">
+                  We're here to help you transform your ideas into reality. Whether you need 
+                  a consultation, have questions about our services, or want to discuss a 
+                  specific project, we'd love to hear from you.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section id="contact" className="section-padding bg-gray-50">

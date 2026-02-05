@@ -17,10 +17,13 @@ const iconMap: any = {
 }
 
 const Services = () => {
+  const [mounted, setMounted] = useState(false)
   const [services, setServices] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    setMounted(true)
+    
     fetch('/api/services')
       .then(res => res.json())
       .then(data => {
@@ -29,6 +32,38 @@ const Services = () => {
       })
       .catch(() => setLoading(false))
   }, [])
+
+  // Prevent hydration mismatch by not rendering animations until mounted
+  if (!mounted) {
+    return (
+      <section id="services" className="section-padding bg-gray-50">
+        <div className="container-custom">
+          {/* Section Header */}
+          <div className="text-center mb-10 sm:mb-12 lg:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-dark-800 mb-4 sm:mb-6 px-4">
+              Our <span className="gradient-text">Services</span>
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-dark-600 max-w-3xl mx-auto px-4">
+              Comprehensive technology solutions tailored to your business needs.
+            </p>
+          </div>
+
+          {/* Services Grid */}
+          <div className="text-center py-12">Loading services...</div>
+
+          {/* Bottom CTA */}
+          <div className="text-center mt-10 sm:mt-12 lg:mt-16 px-4">
+            <p className="text-base sm:text-lg text-dark-600 mb-5 sm:mb-6 lg:mb-8">
+              Ready to transform your business with our technology solutions?
+            </p>
+            <button className="btn-primary text-sm sm:text-base lg:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto">
+              Get Free Consultation
+            </button>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section id="services" className="section-padding bg-gray-50">

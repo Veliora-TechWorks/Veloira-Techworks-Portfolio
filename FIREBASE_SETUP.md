@@ -119,7 +119,7 @@ This will create an admin user with:
 
 ### 2. Access Admin Dashboard
 1. Start the development server: `npm run dev`
-2. Navigate to `http://localhost:3000/admin`
+2. Navigate to `http://localhost:3001/admin`
 3. Login with the admin credentials above
 
 ## 🔧 Firebase Configuration Files

@@ -3,11 +3,14 @@ import { adminDb } from '@/lib/firebase-admin'
 
 export async function GET() {
   try {
-    const snapshot = await adminDb.collection('posts')
-      .where('isPublished', '==', true)
-      .get()
+    console.log('Fetching public posts...')
     
-    const posts = snapshot.docs.map(doc => {
+    // Get all posts first, then filter in JavaScript for better debugging
+    const snapshot = await adminDb.collection('posts').get()
+    
+    console.log(`Found ${snapshot.docs.length} total posts in database`)
+    
+    const allPosts = snapshot.docs.map(doc => {
       const data = doc.data()
       return {
         id: doc.id,
@@ -18,16 +21,24 @@ export async function GET() {
       }
     })
     
+    // Filter published posts
+    const publishedPosts = allPosts.filter((post: any) => {
+      console.log(`Post "${post.title}": isPublished = ${post.isPublished}`)
+      return post.isPublished === true
+    })
+    
+    console.log(`Found ${publishedPosts.length} published posts`)
+    
     // Sort by createdAt in JavaScript
-    posts.sort((a: any, b: any) => {
+    publishedPosts.sort((a: any, b: any) => {
       const dateA = new Date(a.createdAt)
       const dateB = new Date(b.createdAt)
       return dateB.getTime() - dateA.getTime()
     })
     
-    return NextResponse.json(posts)
+    return NextResponse.json(publishedPosts)
   } catch (error) {
-    console.error('Posts API error:', error)
+    console.error('Posts public API error:', error)
     return NextResponse.json([], { status: 200 })
   }
 }
