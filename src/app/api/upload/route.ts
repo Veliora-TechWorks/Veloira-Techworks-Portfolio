@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
               quality: 'auto:good',
               timeout: 60000,
               use_filename: true,
-              unique_filename: false
+              unique_filename: true
             },
             (error, result) => {
               if (error) {
