@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Poppins } from 'next/font/google'
 import ToasterProvider from '@/components/ToasterProvider'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import './globals.css'
 
 const inter = Inter({ 
@@ -40,8 +41,10 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/Favicon.jpg" type="image/jpeg" />
       </head>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`}>
-        <ToasterProvider />
-        {children}
+        <ErrorBoundary>
+          <ToasterProvider />
+          {children}
+        </ErrorBoundary>
       </body>
     </html>
   )
