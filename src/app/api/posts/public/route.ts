@@ -1,44 +1,38 @@
 import { NextResponse } from 'next/server'
 import { adminDb } from '@/lib/firebase-admin'
 
+export const revalidate = 300 // Cache for 5 minutes
+
 export async function GET() {
   try {
-    console.log('Fetching public posts...')
+    const snapshot = await adminDb.collection('posts')
+      .where('isPublished', '==', true)
+      .orderBy('createdAt', 'desc')
+      .limit(50)
+      .get()
     
-    // Get all posts first, then filter in JavaScript for better debugging
-    const snapshot = await adminDb.collection('posts').get()
-    
-    console.log(`Found ${snapshot.docs.length} total posts in database`)
-    
-    const allPosts = snapshot.docs.map(doc => {
+    const posts = snapshot.docs.map(doc => {
       const data = doc.data()
       return {
         id: doc.id,
-        ...data,
-        // Convert Firebase Timestamp to serializable format
-        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
-        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt
+        title: data.title,
+        excerpt: data.excerpt,
+        category: data.category,
+        image: data.image,
+        author: data.author,
+        readTime: data.readTime,
+        tags: data.tags,
+        createdAt: data.createdAt?.toDate?.().toISOString() || data.createdAt,
       }
     })
     
-    // Filter published posts
-    const publishedPosts = allPosts.filter((post: any) => {
-      console.log(`Post "${post.title}": isPublished = ${post.isPublished}`)
-      return post.isPublished === true
+    return NextResponse.json(posts, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600'
+      }
     })
-    
-    console.log(`Found ${publishedPosts.length} published posts`)
-    
-    // Sort by createdAt in JavaScript
-    publishedPosts.sort((a: any, b: any) => {
-      const dateA = new Date(a.createdAt)
-      const dateB = new Date(b.createdAt)
-      return dateB.getTime() - dateA.getTime()
-    })
-    
-    return NextResponse.json(publishedPosts)
   } catch (error) {
-    console.error('Posts public API error:', error)
+    console.error('Posts API error:', error)
     return NextResponse.json([], { status: 200 })
   }
 }

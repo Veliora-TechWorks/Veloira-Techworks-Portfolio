@@ -1,12 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import { Search, Calendar, User, ArrowRight, Tag } from 'lucide-react'
-import Link from 'next/link'
+import { Search, Calendar, User, ArrowRight } from 'lucide-react'
 import Image from 'next/image'
-
 import { formatFirebaseDate } from '@/lib/dateUtils'
 
 export default function ArticlesPage() {
@@ -16,23 +14,36 @@ export default function ArticlesPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/posts/public')
+    const controller = new AbortController()
+    
+    fetch('/api/posts/public', { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
         setArticles(data)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch((err) => {
+        if (err.name !== 'AbortError') setLoading(false)
+      })
+    
+    return () => controller.abort()
   }, [])
 
-  const categories = ['All', ...Array.from(new Set(articles.map(a => a.category)))]
+  const categories = useMemo(() => 
+    ['All', ...Array.from(new Set(articles.map(a => a.category).filter(Boolean)))],
+    [articles]
+  )
 
-  const filteredArticles = articles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         article.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === 'All' || article.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+  const filteredArticles = useMemo(() => {
+    const search = searchTerm.toLowerCase()
+    return articles.filter(article => {
+      const matchesSearch = !search || 
+        article.title?.toLowerCase().includes(search) ||
+        article.excerpt?.toLowerCase().includes(search)
+      const matchesCategory = selectedCategory === 'All' || article.category === selectedCategory
+      return matchesSearch && matchesCategory
+    })
+  }, [articles, searchTerm, selectedCategory])
 
   return (
     <main>
