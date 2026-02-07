@@ -97,50 +97,41 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch team members first
-      const teamRes = await fetch('/api/team')
+      // Fetch all data in parallel
+      const [statsRes, teamRes, jobsRes, contactsRes, postsRes] = await Promise.all([
+        fetch('/api/stats'),
+        fetch('/api/team'),
+        fetch('/api/jobs'),
+        fetch('/api/contacts'),
+        fetch('/api/posts')
+      ])
+
+      // Parse responses with fallbacks
+      const statsData = statsRes.ok ? await statsRes.json() : {}
       const teamData = teamRes.ok ? await teamRes.json() : []
-      setTeamMembers(teamData)
-
-      // Fetch jobs
-      const jobsRes = await fetch('/api/jobs')
       const jobsData = jobsRes.ok ? await jobsRes.json() : []
-      setJobs(jobsData)
+      const contactsData = contactsRes.ok ? await contactsRes.json() : []
+      const postsData = postsRes.ok ? await postsRes.json() : []
 
-      // Fetch other data with fallbacks
-      let projectsData = [], postsData = [], contactsData = []
+      // Update state
+      setTeamMembers(Array.isArray(teamData) ? teamData : [])
+      setJobs(Array.isArray(jobsData) ? jobsData : [])
       
-      try {
-        const projectsRes = await fetch('/api/projects')
-        projectsData = projectsRes.ok ? await projectsRes.json() : []
-      } catch (e) { console.log('Projects API not available') }
-      
-      try {
-        const postsRes = await fetch('/api/posts')
-        postsData = postsRes.ok ? await postsRes.json() : []
-      } catch (e) { console.log('Posts API not available') }
-      
-      try {
-        const contactsRes = await fetch('/api/contacts')
-        contactsData = contactsRes.ok ? await contactsRes.json() : []
-      } catch (e) { console.log('Contacts API not available') }
-
-      // Update stats with real data
+      // Update stats from dedicated endpoint
       setStats({
-        projects: Array.isArray(projectsData) ? projectsData.length : 0,
-        posts: Array.isArray(postsData) ? postsData.length : 0,
-        teamMembers: Array.isArray(teamData) ? teamData.length : 0,
-        contacts: Array.isArray(contactsData) ? contactsData.length : 0,
-        jobs: Array.isArray(jobsData) ? jobsData.length : 0
+        projects: statsData.projects || 0,
+        posts: statsData.posts || 0,
+        teamMembers: statsData.teamMembers || 0,
+        contacts: statsData.contacts || 0,
+        jobs: statsData.jobs || 0
       })
 
-      // Set recent data with fallbacks
+      // Set recent data
       setRecentContacts(Array.isArray(contactsData) ? contactsData.slice(0, 3) : [])
       setRecentPosts(Array.isArray(postsData) ? postsData.slice(0, 3) : [])
       
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
-      // Set fallback data
       setStats({ projects: 0, posts: 0, teamMembers: 0, contacts: 0, jobs: 0 })
       setRecentContacts([])
       setRecentPosts([])
