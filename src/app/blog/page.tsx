@@ -13,26 +13,35 @@ export default function BlogPage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [posts, setPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
     
-    // Add a small delay to prioritize above-the-fold content
-    const timer = setTimeout(() => {
-      fetch('/api/posts/public')
-        .then(res => res.json())
-        .then(data => {
-          console.log('Public posts:', data)
-          setPosts(data.slice(0, 12)) // Limit to 12 posts for performance
-          setLoading(false)
-        })
-        .catch((error) => {
-          console.error('Fetch error:', error)
-          setLoading(false)
-        })
-    }, 100)
-
-    return () => clearTimeout(timer)
+    fetch('/api/posts/public')
+      .then(res => {
+        console.log('Response status:', res.status)
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return res.json()
+      })
+      .then(data => {
+        console.log('Public posts received:', data)
+        if (Array.isArray(data)) {
+          setPosts(data)
+          setError(null)
+        } else {
+          console.error('Invalid data format:', data)
+          setPosts([])
+          setError('Invalid data format')
+        }
+        setLoading(false)
+      })
+      .catch((error) => {
+        console.error('Fetch error:', error)
+        setError(error.message)
+        setPosts([])
+        setLoading(false)
+      })
   }, [])
 
   const categories = ['All', ...Array.from(new Set(posts.map(p => p.category)))]
@@ -44,59 +53,11 @@ export default function BlogPage() {
     return matchesSearch && matchesCategory
   })
 
+  console.log('Render state:', { mounted, loading, postsCount: posts.length, filteredCount: filteredPosts.length })
+
   // Prevent hydration mismatch by not rendering dynamic content until mounted
   if (!mounted) {
-    return (
-      <main>
-        <Header />
-        
-        {/* Hero Section */}
-        <section className="pt-24 pb-12 bg-gradient-to-br from-gray-50 to-white">
-          <div className="container-custom">
-            <div className="text-center max-w-4xl mx-auto">
-              <h1 className="text-4xl md:text-6xl font-display font-bold text-dark-800 mb-4">
-                Insights & <span className="gradient-text">Innovation</span>
-              </h1>
-              <p className="text-xl text-dark-600 mb-6">
-                Stay updated with the latest trends, best practices, and insights from our technology experts.
-              </p>
-              
-              {/* Search */}
-              <div className="relative max-w-md mx-auto mb-6">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search articles..."
-                  value=""
-                  onChange={() => {}}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* Categories */}
-              <div className="flex flex-wrap justify-center gap-3">
-                <button
-                  className="px-4 py-2 rounded-full font-medium transition-all duration-300 bg-primary-500 text-white"
-                >
-                  All
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Blog Posts */}
-        <section className="py-12 bg-white">
-          <div className="container-custom">
-            <div className="text-center py-12">
-              <p className="text-dark-600 text-lg">Loading articles...</p>
-            </div>
-          </div>
-        </section>
-
-        <Footer />
-      </main>
-    )
+    return null
   }
 
   return (
@@ -149,7 +110,18 @@ export default function BlogPage() {
       {/* Blog Posts */}
       <section className="py-12 bg-white">
         <div className="container-custom">
-          {loading ? (
+          {error && (
+            <div className="text-center py-12">
+              <p className="text-red-600 text-lg">Error loading articles: {error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-4 btn-primary"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+          {!error && loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="card overflow-hidden animate-pulse">
@@ -166,7 +138,7 @@ export default function BlogPage() {
                 </div>
               ))}
             </div>
-          ) : filteredPosts.length === 0 ? (
+          ) : !error && filteredPosts.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-dark-600 text-lg">No published articles yet.</p>
               <p className="text-dark-500 text-sm mt-2">Articles created by admin will appear here once published.</p>
