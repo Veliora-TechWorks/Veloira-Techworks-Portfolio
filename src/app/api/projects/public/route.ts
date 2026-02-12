@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { adminDb } from '@/lib/firebase-admin'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET() {
   try {
     console.log('Fetching public projects...')
@@ -35,7 +38,11 @@ export async function GET() {
       return dateB.getTime() - dateA.getTime()
     })
     
-    return NextResponse.json(activeProjects)
+    return NextResponse.json(activeProjects, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      }
+    })
   } catch (error) {
     console.error('Projects public API error:', error)
     return NextResponse.json([], { status: 200 })

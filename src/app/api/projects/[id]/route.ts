@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { adminDb } from '@/lib/firebase-admin'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
     const doc = await adminDb.collection('projects').doc(params.id).get()
@@ -41,8 +44,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    await adminDb.collection('projects').doc(params.id).delete()
-    return NextResponse.json({ success: true })
+    // Soft delete by setting isActive to false
+    await adminDb.collection('projects').doc(params.id).update({ 
+      isActive: false,
+      deletedAt: new Date()
+    })
+    return NextResponse.json({ success: true }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      }
+    })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 })
   }

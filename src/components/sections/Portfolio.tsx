@@ -16,7 +16,8 @@ const Portfolio = () => {
     
     // Add a small delay to prioritize above-the-fold content
     const timer = setTimeout(() => {
-      fetch('/api/projects/public')
+      const timestamp = Date.now()
+      fetch(`/api/projects/public?t=${timestamp}`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
           setProjects(data.slice(0, 6)) // Limit to 6 projects for performance

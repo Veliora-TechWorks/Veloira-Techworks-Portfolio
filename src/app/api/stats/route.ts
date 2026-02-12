@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { adminDb } from '@/lib/firebase-admin'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET() {
   try {
     const [projectsSnapshot, postsSnapshot, servicesSnapshot, contactsSnapshot, teamSnapshot, jobsSnapshot] = await Promise.all([
@@ -12,14 +15,24 @@ export async function GET() {
       adminDb.collection('jobs').get()
     ])
 
+    // Filter active projects only
+    const activeProjects = projectsSnapshot.docs.filter(doc => {
+      const data = doc.data()
+      return data.isActive !== false
+    })
+
     return NextResponse.json({
-      projects: projectsSnapshot.size,
+      projects: activeProjects.length,
       posts: postsSnapshot.size,
       articles: postsSnapshot.size,
       services: servicesSnapshot.size,
       contacts: contactsSnapshot.size,
       teamMembers: teamSnapshot.size,
       jobs: jobsSnapshot.size
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      }
     })
   } catch (error) {
     console.error('Error fetching stats:', error)

@@ -97,13 +97,14 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch all data in parallel
+      // Fetch all data in parallel with cache busting
+      const timestamp = Date.now()
       const [statsRes, teamRes, jobsRes, contactsRes, postsRes] = await Promise.all([
-        fetch('/api/stats'),
-        fetch('/api/team'),
-        fetch('/api/jobs'),
-        fetch('/api/contacts'),
-        fetch('/api/posts')
+        fetch(`/api/stats?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/team?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/jobs?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/contacts?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/posts?t=${timestamp}`, { cache: 'no-store' })
       ])
 
       // Parse responses with fallbacks

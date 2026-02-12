@@ -1,17 +1,28 @@
 import { NextResponse } from 'next/server'
 import { adminDb } from '@/lib/firebase-admin'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET() {
   try {
     const snapshot = await adminDb.collection('projects').get()
-    const projects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    const projects = snapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter((project: any) => project.isActive !== false) // Filter out deleted projects
+    
     // Sort by createdAt in JavaScript
     projects.sort((a: any, b: any) => {
       const dateA = a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000) : new Date(a.createdAt)
       const dateB = b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000) : new Date(b.createdAt)
       return dateB.getTime() - dateA.getTime()
     })
-    return NextResponse.json(projects)
+    
+    return NextResponse.json(projects, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      }
+    })
   } catch (error) {
     console.error('Get projects error:', error)
     return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 })
