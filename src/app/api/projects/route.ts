@@ -4,24 +4,22 @@ import { adminDb } from '@/lib/firebase-admin'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const snapshot = await adminDb.collection('projects').get()
-    const projects = snapshot.docs
-      .map(doc => ({ id: doc.id, ...doc.data() }))
-      .filter((project: any) => project.isActive !== false) // Filter out deleted projects
+    const { searchParams } = new URL(request.url)
+    const limit = parseInt(searchParams.get('limit') || '50')
     
-    // Sort by createdAt in JavaScript
-    projects.sort((a: any, b: any) => {
-      const dateA = a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000) : new Date(a.createdAt)
-      const dateB = b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000) : new Date(b.createdAt)
-      return dateB.getTime() - dateA.getTime()
-    })
+    const snapshot = await adminDb.collection('projects')
+      .where('isActive', '!=', false)
+      .orderBy('isActive')
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
+      .get()
+      
+    const projects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
     
     return NextResponse.json(projects, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-      }
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' }
     })
   } catch (error) {
     console.error('Get projects error:', error)

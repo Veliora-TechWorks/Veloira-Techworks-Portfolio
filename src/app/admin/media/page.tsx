@@ -3,7 +3,8 @@
 import AdminLayout from '@/components/layout/AdminLayout'
 import FileDropzone from '@/components/ui/FileDropzone'
 import UploadProgress from '@/components/ui/UploadProgress'
-import { Upload, Search, Image as ImageIcon, Trash2, Edit, Copy } from 'lucide-react'
+import ImageCropper from '@/components/ui/ImageCropper'
+import { Upload, Search, Image as ImageIcon, Trash2, Edit, Copy, Crop } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { uploadToCloudinary } from '@/lib/cloudinary'
 import toast from 'react-hot-toast'
@@ -17,6 +18,7 @@ interface Media {
   category: string | null
   size: number
   createdAt: string
+  imagePosition?: { x: number; y: number; zoom: number }
 }
 
 export default function MediaPage() {
@@ -26,6 +28,7 @@ export default function MediaPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editCategory, setEditCategory] = useState('')
+  const [cropperImage, setCropperImage] = useState<{ url: string; id: string } | null>(null)
   const [showDropzone, setShowDropzone] = useState(false)
   const [uploadingFiles, setUploadingFiles] = useState<File[]>([])
 
@@ -111,14 +114,14 @@ export default function MediaPage() {
     }
   }
 
-  const handleUpdateCategory = async (id: string, category: string) => {
+  const handleUpdateCategory = async (id: string, category: string, imagePosition?: { x: number; y: number; zoom: number }) => {
     try {
       await fetch(`/api/media/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category })
+        body: JSON.stringify({ category, imagePosition })
       })
-      toast.success('Category updated')
+      toast.success('Updated successfully')
       setEditingId(null)
       fetchMedia()
     } catch (error) {
@@ -211,13 +214,24 @@ export default function MediaPage() {
                 filteredMedia.map((item) => (
                   <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden group">
                     <div className="aspect-square relative bg-gray-100">
-                      <Image
-                        src={item.url}
-                        alt={item.originalName}
-                        fill
-                        className="object-cover"
-                        unoptimized
+                      <div
+                        className="w-full h-full"
+                        style={{
+                          backgroundImage: `url(${item.url})`,
+                          backgroundSize: item.imagePosition ? `${item.imagePosition.zoom}%` : 'cover',
+                          backgroundPosition: item.imagePosition 
+                            ? `${item.imagePosition.x}% ${item.imagePosition.y}%` 
+                            : 'center',
+                          backgroundRepeat: 'no-repeat'
+                        }}
                       />
+                      <button
+                        onClick={() => setCropperImage({ url: item.url, id: item.id })}
+                        className="absolute top-2 right-2 bg-blue-500 text-white p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Adjust position"
+                      >
+                        <Crop className="w-4 h-4" />
+                      </button>
                     </div>
                     <div className="p-3">
                       <p className="text-sm font-medium text-gray-900 truncate">{item.originalName}</p>
@@ -271,6 +285,21 @@ export default function MediaPage() {
               )}
             </div>
           </>
+        )}
+
+        {cropperImage && (
+          <ImageCropper
+            imageUrl={cropperImage.url}
+            initialPosition={media.find(m => m.id === cropperImage.id)?.imagePosition}
+            onSave={(position) => {
+              const item = media.find(m => m.id === cropperImage.id)
+              if (item) {
+                handleUpdateCategory(item.id, item.category || 'general', position)
+              }
+              setCropperImage(null)
+            }}
+            onClose={() => setCropperImage(null)}
+          />
         )}
       </div>
     </AdminLayout>

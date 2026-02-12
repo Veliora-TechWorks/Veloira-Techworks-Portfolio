@@ -1,7 +1,8 @@
 'use client'
 
 import AdminLayout from '@/components/layout/AdminLayout'
-import { Plus, Edit, Trash2, X } from 'lucide-react'
+import ImageCropper from '@/components/ui/ImageCropper'
+import { Plus, Edit, Trash2, X, Upload, Crop } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 
@@ -10,10 +11,15 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingService, setEditingService] = useState<any>(null)
+  const [uploading, setUploading] = useState(false)
+  const [cropperImage, setCropperImage] = useState<string | null>(null)
+  const [imagePosition, setImagePosition] = useState<{ x: number; y: number; zoom: number } | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     icon: '',
+    image: '',
+    imagePosition: null as { x: number; y: number; zoom: number } | null,
     features: '',
     price: '',
     isActive: true
@@ -42,6 +48,8 @@ export default function ServicesPage() {
         title: formData.title,
         description: formData.description,
         icon: formData.icon,
+        image: formData.image,
+        imagePosition: imagePosition,
         features: formData.features.split(',').map(f => f.trim()).filter(f => f),
         price: formData.price || null,
         isActive: formData.isActive
@@ -84,10 +92,13 @@ export default function ServicesPage() {
 
   const handleEdit = (service: any) => {
     setEditingService(service)
+    setImagePosition(service.imagePosition || null)
     setFormData({
       title: service.title,
       description: service.description,
       icon: service.icon,
+      image: service.image || '',
+      imagePosition: service.imagePosition || null,
       features: service.features?.join(', ') || '',
       price: service.price || '',
       isActive: service.isActive
@@ -100,10 +111,38 @@ export default function ServicesPage() {
       title: '',
       description: '',
       icon: '',
+      image: '',
+      imagePosition: null,
       features: '',
       price: '',
       isActive: true
     })
+    setImagePosition(null)
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    toast.loading('Uploading...', { id: 'upload' })
+    
+    try {
+      const fd = new FormData()
+      fd.append('files', file)
+      fd.append('category', 'services')
+
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      if (!res.ok) throw new Error('Upload failed')
+
+      const result = await res.json()
+      setFormData(prev => ({ ...prev, image: result.files[0].url }))
+      toast.success('Uploaded', { id: 'upload' })
+    } catch (error) {
+      toast.error('Failed', { id: 'upload' })
+    } finally {
+      setUploading(false)
+    }
   }
 
   return (
@@ -190,6 +229,38 @@ export default function ServicesPage() {
                   rows={3}
                   required
                 />
+                <div>
+                  <label className="block text-sm font-medium mb-2">Image</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Image URL"
+                      value={formData.image}
+                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                      className="flex-1 px-4 py-2 border rounded-lg"
+                    />
+                    <label className="btn-outline px-4 py-2 cursor-pointer">
+                      <Upload className="w-4 h-4" />
+                      <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} className="hidden" />
+                    </label>
+                  </div>
+                  {formData.image && (
+                    <div className="mt-2 relative group inline-block">
+                      <div 
+                        className="h-32 w-48 rounded-lg"
+                        style={{
+                          backgroundImage: `url(${formData.image})`,
+                          backgroundSize: imagePosition ? `${imagePosition.zoom}%` : 'cover',
+                          backgroundPosition: imagePosition ? `${imagePosition.x}% ${imagePosition.y}%` : 'center',
+                          backgroundRepeat: 'no-repeat'
+                        }}
+                      />
+                      <button type="button" onClick={() => setCropperImage(formData.image)} className="absolute top-2 right-2 bg-blue-500 text-white p-2 rounded opacity-0 group-hover:opacity-100">
+                        <Crop className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <input
                   type="text"
                   placeholder="Icon (e.g., Code, Smartphone, Cloud)"
@@ -226,6 +297,18 @@ export default function ServicesPage() {
               </form>
             </div>
           </div>
+        )}
+
+        {cropperImage && (
+          <ImageCropper
+            imageUrl={cropperImage}
+            initialPosition={imagePosition || undefined}
+            onSave={(position) => {
+              setImagePosition(position)
+              setCropperImage(null)
+            }}
+            onClose={() => setCropperImage(null)}
+          />
         )}
       </div>
     </AdminLayout>

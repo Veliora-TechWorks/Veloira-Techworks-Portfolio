@@ -106,14 +106,17 @@ const Portfolio = () => {
               >
                 {/* Project Image */}
                 <div className="relative overflow-hidden bg-gradient-to-br from-primary-100 to-accent-100 h-48 sm:h-56 md:h-64">
-                  {project.image ? (
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      fill
-                      className="object-cover transition-transform duration-500 hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      loading="lazy"
+                  {project.gallery?.[0] || project.image ? (
+                    <div
+                      className="w-full h-full transition-transform duration-500 hover:scale-105"
+                      style={{
+                        backgroundImage: `url(${project.gallery?.[0] || project.image})`,
+                        backgroundSize: project.imagePositions?.[0]?.zoom ? `${project.imagePositions[0].zoom}%` : 'cover',
+                        backgroundPosition: project.imagePositions?.[0] 
+                          ? `${project.imagePositions[0].x}% ${project.imagePositions[0].y}%` 
+                          : 'center',
+                        backgroundRepeat: 'no-repeat'
+                      }}
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">

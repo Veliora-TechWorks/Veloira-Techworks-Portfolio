@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server'
 import { adminDb } from '@/lib/firebase-admin'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const limit = parseInt(searchParams.get('limit') || '50')
+    
     const snapshot = await adminDb.collection('posts')
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
       .get()
     
     const posts = snapshot.docs.map(doc => {
@@ -11,20 +16,14 @@ export async function GET() {
       return {
         id: doc.id,
         ...data,
-        // Convert Firebase Timestamp to serializable format
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
         updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt
       }
     })
     
-    // Sort by createdAt in JavaScript
-    posts.sort((a: any, b: any) => {
-      const dateA = new Date(a.createdAt)
-      const dateB = new Date(b.createdAt)
-      return dateB.getTime() - dateA.getTime()
+    return NextResponse.json(posts, {
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' }
     })
-    
-    return NextResponse.json(posts)
   } catch (error) {
     console.error('Get posts error:', error)
     return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 })

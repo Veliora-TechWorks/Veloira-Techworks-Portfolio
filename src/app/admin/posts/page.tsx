@@ -1,7 +1,8 @@
 'use client'
 
 import AdminLayout from '@/components/layout/AdminLayout'
-import { Plus, Search, Edit, Trash2, Eye, X } from 'lucide-react'
+import ImageCropper from '@/components/ui/ImageCropper'
+import { Plus, Search, Edit, Trash2, Eye, X, Crop } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 
@@ -11,10 +12,13 @@ export default function PostsPage() {
   const [showModal, setShowModal] = useState(false)
   const [editingPost, setEditingPost] = useState<any>(null)
   const [uploading, setUploading] = useState(false)
+  const [cropperImage, setCropperImage] = useState<string | null>(null)
+  const [imagePosition, setImagePosition] = useState<{ x: number; y: number; zoom: number } | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     excerpt: '',
     image: '',
+    imagePosition: null as { x: number; y: number; zoom: number } | null,
     publishedAt: '',
     linkedinUrl: '',
     isPublished: true
@@ -29,7 +33,17 @@ export default function PostsPage() {
       const res = await fetch('/api/posts')
       const data = await res.json()
       console.log('Fetched posts:', data)
-      setPosts(data)
+      const sorted = data.sort((a: any, b: any) => {
+        const getTime = (date: any) => {
+          if (!date) return 0
+          if (typeof date === 'string') return new Date(date).getTime()
+          if (date.seconds) return date.seconds * 1000
+          if (date._seconds) return date._seconds * 1000
+          return new Date(date).getTime()
+        }
+        return getTime(b.createdAt) - getTime(a.createdAt)
+      })
+      setPosts(sorted)
     } catch (error) {
       console.error('Fetch error:', error)
       toast.error('Failed to load posts')
@@ -70,6 +84,7 @@ export default function PostsPage() {
         content: formData.excerpt,
         category: 'Article',
         image: formData.image,
+        imagePosition: imagePosition,
         tags: [formData.linkedinUrl],
         readTime: 5,
         isPublished: formData.isPublished,
@@ -124,6 +139,7 @@ export default function PostsPage() {
 
   const handleEdit = (post: any) => {
     setEditingPost(post)
+    setImagePosition(post.imagePosition || null)
     
     // Safe date handling
     let publishedAt = ''
@@ -146,6 +162,7 @@ export default function PostsPage() {
       title: post.title || '',
       excerpt: post.excerpt || '',
       image: post.image || '',
+      imagePosition: post.imagePosition || null,
       publishedAt: publishedAt,
       linkedinUrl: post.tags?.[0] || '',
       isPublished: post.isPublished ?? true
@@ -158,10 +175,12 @@ export default function PostsPage() {
       title: '',
       excerpt: '',
       image: '',
+      imagePosition: null,
       publishedAt: '',
       linkedinUrl: '',
       isPublished: true
     })
+    setImagePosition(null)
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -307,7 +326,27 @@ export default function PostsPage() {
                     </label>
                   </div>
                   {formData.image && (
-                    <img src={formData.image} alt="Preview" className="mt-2 h-32 w-auto rounded-lg" />
+                    <div className="mt-2 relative group inline-block">
+                      <div 
+                        className="h-32 w-48 rounded-lg overflow-hidden"
+                        style={{
+                          backgroundImage: `url(${formData.image})`,
+                          backgroundSize: imagePosition ? `${imagePosition.zoom}%` : 'cover',
+                          backgroundPosition: imagePosition 
+                            ? `${imagePosition.x}% ${imagePosition.y}%` 
+                            : 'center',
+                          backgroundRepeat: 'no-repeat'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setCropperImage(formData.image)}
+                        className="absolute top-2 right-2 bg-blue-500 text-white p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Adjust position"
+                      >
+                        <Crop className="w-4 h-4" />
+                      </button>
+                    </div>
                   )}
                 </div>
                 <input
@@ -332,6 +371,19 @@ export default function PostsPage() {
               </form>
             </div>
           </div>
+        )}
+
+        {cropperImage && (
+          <ImageCropper
+            imageUrl={cropperImage}
+            initialPosition={imagePosition || undefined}
+            onSave={(position) => {
+              setImagePosition(position)
+              setFormData(prev => ({ ...prev, imagePosition: position }))
+              setCropperImage(null)
+            }}
+            onClose={() => setCropperImage(null)}
+          />
         )}
       </div>
     </AdminLayout>

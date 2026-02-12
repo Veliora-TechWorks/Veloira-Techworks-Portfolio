@@ -15,7 +15,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    await adminDb.collection('services').doc(params.id).delete()
+    await adminDb.collection('services').doc(params.id).update({ 
+      isActive: false,
+      deletedAt: new Date()
+    })
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete service' }, { status: 500 })

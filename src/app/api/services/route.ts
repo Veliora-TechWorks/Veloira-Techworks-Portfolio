@@ -3,11 +3,18 @@ import { adminDb } from '@/lib/firebase-admin'
 
 export async function GET() {
   try {
-    const snapshot = await adminDb.collection('services').get()
+    const snapshot = await adminDb.collection('services')
+      .where('isActive', '!=', false)
+      .orderBy('isActive')
+      .orderBy('order', 'asc')
+      .limit(20)
+      .get()
+      
     const services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-    // Sort by order field, fallback to createdAt
-    services.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
-    return NextResponse.json(services)
+    
+    return NextResponse.json(services, {
+      headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' }
+    })
   } catch (error) {
     console.error('Get services error:', error)
     return NextResponse.json({ error: 'Failed to fetch services' }, { status: 500 })

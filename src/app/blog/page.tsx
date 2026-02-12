@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Search, Calendar, User, ArrowRight } from 'lucide-react'
-import Image from 'next/image'
 import { formatFirebaseDate } from '@/lib/dateUtils'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -150,13 +149,16 @@ export default function BlogPage() {
                   {/* Post Image */}
                   <div className="relative h-48 bg-gradient-to-br from-primary-100 to-accent-100 overflow-hidden">
                     {post.image ? (
-                      <Image
-                        src={post.image}
-                        alt={post.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        loading="lazy"
+                      <div
+                        className="w-full h-full"
+                        style={{
+                          backgroundImage: `url(${post.image})`,
+                          backgroundSize: post.imagePosition?.zoom ? `${post.imagePosition.zoom}%` : 'cover',
+                          backgroundPosition: post.imagePosition 
+                            ? `${post.imagePosition.x}% ${post.imagePosition.y}%` 
+                            : 'center',
+                          backgroundRepeat: 'no-repeat'
+                        }}
                       />
                     ) : (
                       <>

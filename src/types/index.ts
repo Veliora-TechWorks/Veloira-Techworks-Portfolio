@@ -28,6 +28,7 @@ export interface Project {
   content?: string
   image?: string
   gallery: string[]
+  imagePositions?: Record<number, { x: number; y: number; zoom: number }>
   category: string
   tags: string[]
   client?: string
@@ -51,6 +52,7 @@ export interface Post {
   excerpt?: string
   content: string
   image?: string
+  imagePosition?: { x: number; y: number; zoom: number }
   category: string
   tags: string[]
   isPublished: boolean

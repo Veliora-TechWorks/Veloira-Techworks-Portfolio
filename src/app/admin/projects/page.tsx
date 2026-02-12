@@ -1,7 +1,8 @@
 'use client'
 
 import AdminLayout from '@/components/layout/AdminLayout'
-import { Plus, Edit, Trash2, X } from 'lucide-react'
+import ImageCropper from '@/components/ui/ImageCropper'
+import { Plus, Edit, Trash2, X, Crop } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 
@@ -11,12 +12,15 @@ export default function ProjectsPage() {
   const [showModal, setShowModal] = useState(false)
   const [editingProject, setEditingProject] = useState<any>(null)
   const [uploading, setUploading] = useState(false)
+  const [cropperImage, setCropperImage] = useState<{ url: string; index: number } | null>(null)
+  const [imagePositions, setImagePositions] = useState<Record<number, { x: number; y: number; zoom: number }>>({})
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: '',
     image: '',
     gallery: [] as string[],
+    imagePositions: {} as Record<number, { x: number; y: number; zoom: number }>,
     technologies: '',
     features: '',
     content: '',
@@ -76,6 +80,7 @@ export default function ProjectsPage() {
         category: formData.category,
         image: formData.gallery[0] || formData.image,
         gallery: formData.gallery,
+        imagePositions: imagePositions,
         technologies: formData.technologies.split(',').map(t => t.trim()),
         features: formData.features.split(',').map(f => f.trim()).filter(f => f),
         content: formData.content || null,
@@ -134,12 +139,15 @@ export default function ProjectsPage() {
 
   const handleEdit = (project: any) => {
     setEditingProject(project)
+    const positions = project.imagePositions || {}
+    setImagePositions(positions)
     setFormData({
       title: project.title,
       description: project.description,
       category: project.category,
       image: project.image || '',
       gallery: project.gallery || [],
+      imagePositions: positions,
       technologies: project.technologies?.join(', ') || '',
       features: project.features?.join(', ') || '',
       content: project.content || '',
@@ -159,6 +167,7 @@ export default function ProjectsPage() {
       category: '',
       image: '',
       gallery: [],
+      imagePositions: {},
       technologies: '',
       features: '',
       content: '',
@@ -168,6 +177,7 @@ export default function ProjectsPage() {
       isActive: true,
       isFeatured: false
     })
+    setImagePositions({})
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -327,17 +337,37 @@ export default function ProjectsPage() {
                     <div className="mt-3 grid grid-cols-3 gap-2">
                       {formData.gallery.map((url, index) => (
                         <div key={index} className="relative group">
-                          <img src={url} alt={`Image ${index + 1}`} className="h-24 w-full object-cover rounded-lg" />
+                          <div 
+                            className="h-24 w-full rounded-lg overflow-hidden"
+                            style={{
+                              backgroundImage: `url(${url})`,
+                              backgroundSize: imagePositions[index] ? `${imagePositions[index].zoom}%` : 'cover',
+                              backgroundPosition: imagePositions[index] 
+                                ? `${imagePositions[index].x}% ${imagePositions[index].y}%` 
+                                : 'center',
+                              backgroundRepeat: 'no-repeat'
+                            }}
+                          />
                           {index === 0 && (
                             <span className="absolute top-1 left-1 bg-primary-500 text-white text-xs px-2 py-1 rounded">Cover</span>
                           )}
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            ×
-                          </button>
+                          <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={() => setCropperImage({ url, index })}
+                              className="bg-blue-500 text-white p-1 rounded text-xs"
+                              title="Adjust position"
+                            >
+                              <Crop className="w-3 h-3" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="bg-red-500 text-white p-1 rounded"
+                            >
+                              ×
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -409,6 +439,18 @@ export default function ProjectsPage() {
               </form>
             </div>
           </div>
+        )}
+
+        {cropperImage && (
+          <ImageCropper
+            imageUrl={cropperImage.url}
+            initialPosition={imagePositions[cropperImage.index]}
+            onSave={(position) => {
+              setImagePositions(prev => ({ ...prev, [cropperImage.index]: position }))
+              setCropperImage(null)
+            }}
+            onClose={() => setCropperImage(null)}
+          />
         )}
       </div>
     </AdminLayout>

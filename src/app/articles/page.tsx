@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from 'react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { Search, Calendar, User, ArrowRight } from 'lucide-react'
-import Image from 'next/image'
 import { formatFirebaseDate } from '@/lib/dateUtils'
 
 export default function ArticlesPage() {
@@ -103,12 +102,16 @@ export default function ArticlesPage() {
                 <article key={article.id} className="card overflow-hidden group hover:scale-105 transition-all duration-300">
                   <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                     {article.image ? (
-                      <Image
-                        src={article.image}
-                        alt={article.title}
-                        fill
-                        className="object-cover"
-                        unoptimized
+                      <div 
+                        className="w-full h-full"
+                        style={{
+                          backgroundImage: `url(${article.image})`,
+                          backgroundSize: article.imagePosition?.zoom ? `${article.imagePosition.zoom}%` : 'cover',
+                          backgroundPosition: article.imagePosition 
+                            ? `${article.imagePosition.x}% ${article.imagePosition.y}%` 
+                            : 'center',
+                          backgroundRepeat: 'no-repeat'
+                        }}
                       />
                     ) : (
                       <>

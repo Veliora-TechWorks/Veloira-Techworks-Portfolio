@@ -6,33 +6,25 @@ export const revalidate = 0
 
 export async function GET() {
   try {
-    const [projectsSnapshot, postsSnapshot, servicesSnapshot, contactsSnapshot, teamSnapshot, jobsSnapshot] = await Promise.all([
-      adminDb.collection('projects').get(),
-      adminDb.collection('posts').get(),
-      adminDb.collection('services').get(),
-      adminDb.collection('contacts').get(),
-      adminDb.collection('team').get(),
-      adminDb.collection('jobs').get()
+    const [projectsCount, postsCount, servicesCount, contactsCount, teamCount, jobsCount] = await Promise.all([
+      adminDb.collection('projects').where('isActive', '!=', false).count().get(),
+      adminDb.collection('posts').count().get(),
+      adminDb.collection('services').where('isActive', '!=', false).count().get(),
+      adminDb.collection('contacts').count().get(),
+      adminDb.collection('team').count().get(),
+      adminDb.collection('jobs').count().get()
     ])
 
-    // Filter active projects only
-    const activeProjects = projectsSnapshot.docs.filter(doc => {
-      const data = doc.data()
-      return data.isActive !== false
-    })
-
     return NextResponse.json({
-      projects: activeProjects.length,
-      posts: postsSnapshot.size,
-      articles: postsSnapshot.size,
-      services: servicesSnapshot.size,
-      contacts: contactsSnapshot.size,
-      teamMembers: teamSnapshot.size,
-      jobs: jobsSnapshot.size
+      projects: projectsCount.data().count,
+      posts: postsCount.data().count,
+      articles: postsCount.data().count,
+      services: servicesCount.data().count,
+      contacts: contactsCount.data().count,
+      teamMembers: teamCount.data().count,
+      jobs: jobsCount.data().count
     }, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-      }
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' }
     })
   } catch (error) {
     console.error('Error fetching stats:', error)
