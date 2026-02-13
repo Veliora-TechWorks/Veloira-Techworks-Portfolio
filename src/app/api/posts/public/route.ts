@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { adminDb } from '@/lib/firebase-admin'
 
-export const revalidate = 0
-export const dynamic = 'force-dynamic'
+export const revalidate = 300 // Revalidate every 5 minutes
 
 export async function GET() {
   try {
@@ -28,7 +27,9 @@ export async function GET() {
       .filter(post => post.isPublished === true || post.isPublished === 'true')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     
-    return NextResponse.json(posts)
+    return NextResponse.json(posts, {
+      headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' }
+    })
   } catch (error) {
     console.error('Posts API error:', error)
     return NextResponse.json([], { status: 200 })

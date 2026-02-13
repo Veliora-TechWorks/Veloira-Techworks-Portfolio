@@ -50,7 +50,8 @@ export default function ContactsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {/* Desktop Table View */}
+        <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -103,6 +104,48 @@ export default function ContactsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {contacts.map((contact) => (
+            <div key={contact.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <h3 className="font-medium text-gray-900 mb-2">{contact.name}</h3>
+                  <div className="space-y-1">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Mail className="w-3 h-3 mr-2" />
+                      {contact.email}
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Phone className="w-3 h-3 mr-2" />
+                      {contact.phone}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">{contact.subject}</p>
+                  <p className="text-xs text-gray-500 mt-1">{contact.createdAt}</p>
+                </div>
+                <span className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ml-2 ${
+                  contact.status === 'NEW' ? 'bg-blue-100 text-blue-800' :
+                  contact.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-green-100 text-green-800'
+                }`}>
+                  {contact.status.replace('_', ' ')}
+                </span>
+              </div>
+              <div className="flex gap-2 mt-3">
+                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg">
+                  <Eye className="w-4 h-4" />
+                  <span>View</span>
+                </button>
+                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-red-700 bg-red-50 hover:bg-red-100 rounded-lg">
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </AdminLayout>

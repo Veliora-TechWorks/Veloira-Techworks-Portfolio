@@ -53,6 +53,7 @@ interface Job {
 }
 
 export default function AdminDashboard() {
+  const [mounted, setMounted] = useState(false)
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [jobs, setJobs] = useState<Job[]>([])
   const [showTeamForm, setShowTeamForm] = useState(false)
@@ -92,6 +93,7 @@ export default function AdminDashboard() {
   })
 
   useEffect(() => {
+    setMounted(true)
     fetchDashboardData()
   }, [])
 
@@ -308,6 +310,19 @@ export default function AdminDashboard() {
       color: 'bg-orange-500'
     }
   ]
+
+  if (!mounted) {
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-display font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 mt-2">Loading dashboard...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    )
+  }
 
   return (
     <AdminLayout>

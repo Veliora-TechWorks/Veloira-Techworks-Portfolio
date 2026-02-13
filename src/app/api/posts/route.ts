@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { adminDb } from '@/lib/firebase-admin'
 
+export const revalidate = 60 // Revalidate every 60 seconds
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)

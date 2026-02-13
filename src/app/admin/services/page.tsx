@@ -1,5 +1,6 @@
 'use client'
 
+// Services management page - updated
 import AdminLayout from '@/components/layout/AdminLayout'
 import ImageCropper from '@/components/ui/ImageCropper'
 import { Plus, Edit, Trash2, X, Upload, Crop } from 'lucide-react'
@@ -31,10 +32,7 @@ export default function ServicesPage() {
 
   const fetchServices = async () => {
     try {
-      const res = await fetch('/api/services', { 
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
-      })
+      const res = await fetch('/api/services')
       
       if (!res.ok) {
         const errorData = await res.json()
@@ -185,45 +183,78 @@ export default function ServicesPage() {
         {loading ? (
           <div className="text-center py-12">Loading...</div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Icon</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {services.map((service) => (
-                  <tr key={service.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">{service.title}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{service.icon}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{service.price || '-'}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        service.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {service.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <button onClick={() => handleEdit(service)} className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => handleDelete(service.id)} className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Icon</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {services.map((service) => (
+                    <tr key={service.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 font-medium text-gray-900">{service.title}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{service.icon}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{service.price || '-'}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          service.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {service.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-2">
+                          <button onClick={() => handleEdit(service)} className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded">
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleDelete(service.id)} className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {services.map((service) => (
+                <div key={service.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900 mb-1">{service.title}</h3>
+                      <p className="text-sm text-gray-600">Icon: {service.icon}</p>
+                      {service.price && <p className="text-sm text-gray-600 mt-1">Price: {service.price}</p>}
+                    </div>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ml-2 ${
+                      service.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {service.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <button onClick={() => handleEdit(service)} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg">
+                      <Edit className="w-4 h-4" />
+                      <span>Edit</span>
+                    </button>
+                    <button onClick={() => handleDelete(service.id)} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-red-700 bg-red-50 hover:bg-red-100 rounded-lg">
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {showModal && (

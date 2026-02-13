@@ -6,6 +6,8 @@ import Contact from '@/components/sections/Contact'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 
+export const revalidate = 300 // Revalidate every 5 minutes
+
 export default function Home() {
   return (
     <main>

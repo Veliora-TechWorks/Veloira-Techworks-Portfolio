@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { adminDb } from '@/lib/firebase-admin'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const revalidate = 60 // Revalidate every 60 seconds
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -51,7 +50,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     })
     return NextResponse.json({ success: true }, {
       headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Cache-Control': 'no-cache',
       }
     })
   } catch (error) {

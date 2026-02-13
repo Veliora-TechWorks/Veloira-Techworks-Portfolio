@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { adminDb } from '@/lib/firebase-admin'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+export const revalidate = 300 // Revalidate every 5 minutes
 
 export async function GET() {
   try {
@@ -40,7 +39,7 @@ export async function GET() {
     
     return NextResponse.json(activeProjects, {
       headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
       }
     })
   } catch (error) {
