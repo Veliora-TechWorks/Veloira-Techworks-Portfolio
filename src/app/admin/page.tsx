@@ -3,10 +3,10 @@
 import AdminLayout from '@/components/layout/AdminLayout'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { 
-  Users, 
-  FileText, 
-  FolderOpen, 
+import {
+  Users,
+  FileText,
+  FolderOpen,
   MessageSquare,
   TrendingUp,
   Eye,
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
       // Update state
       setTeamMembers(Array.isArray(teamData) ? teamData : [])
       setJobs(Array.isArray(jobsData) ? jobsData : [])
-      
+
       // Update stats from dedicated endpoint
       setStats({
         projects: statsData.projects || 0,
@@ -130,7 +130,7 @@ export default function AdminDashboard() {
       // Set recent data
       setRecentContacts(Array.isArray(contactsData) ? contactsData.slice(0, 3) : [])
       setRecentPosts(Array.isArray(postsData) ? postsData.slice(0, 3) : [])
-      
+
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
       setStats({ projects: 0, posts: 0, teamMembers: 0, contacts: 0, jobs: 0 })
@@ -153,11 +153,11 @@ export default function AdminDashboard() {
         method: 'POST',
         body: formData
       })
-      
+
       if (!res.ok) {
         throw new Error(`Upload failed: ${res.status}`)
       }
-      
+
       const data = await res.json()
       if (data.files && data.files[0]) {
         setTeamFormData({ ...teamFormData, image: data.files[0].url })
@@ -175,13 +175,13 @@ export default function AdminDashboard() {
     try {
       const url = editingTeamId ? `/api/team/${editingTeamId}` : '/api/team'
       const method = editingTeamId ? 'PUT' : 'POST'
-      
+
       await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(teamFormData)
       })
-      
+
       fetchDashboardData()
       resetTeamForm()
     } catch (error) {
@@ -197,7 +197,7 @@ export default function AdminDashboard() {
 
   const handleTeamDelete = async (id: string) => {
     if (!confirm('Delete this team member?')) return
-    
+
     try {
       await fetch(`/api/team/${id}`, { method: 'DELETE' })
       fetchDashboardData()
@@ -226,13 +226,13 @@ export default function AdminDashboard() {
     try {
       const url = editingJobId ? `/api/jobs/${editingJobId}` : '/api/jobs'
       const method = editingJobId ? 'PUT' : 'POST'
-      
+
       await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(jobFormData)
       })
-      
+
       fetchDashboardData()
       resetJobForm()
     } catch (error) {
@@ -248,7 +248,7 @@ export default function AdminDashboard() {
 
   const handleJobDelete = async (id: string) => {
     if (!confirm('Delete this job posting?')) return
-    
+
     try {
       await fetch(`/api/jobs/${id}`, { method: 'DELETE' })
       fetchDashboardData()
@@ -319,31 +319,33 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Stats Grid - Mobile Scroll / Desktop Grid */}
+        {/* Stats Grid - Professional & Organized */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
           {statsData.map((stat) => (
-            <div key={stat.name} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
-                  <div className="flex items-center mt-2">
-                    <span className={`text-sm font-medium ${
-                      stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {stat.change}
-                    </span>
-                    <span className="text-sm text-gray-500 ml-1">from last month</span>
-                  </div>
+            <div key={stat.name} className="flex flex-col bg-white rounded-xl border border-gray-100 shadow-[0_2px_4px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-200 p-4 md:p-5">
+              <div className="flex items-start justify-between mb-3 md:mb-4">
+                <span className="text-[11px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">{stat.name}</span>
+                <div className={`p-2 md:p-2.5 rounded-lg ${stat.color} shadow-sm transform transition-transform group-hover:scale-105`}>
+                  <stat.icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </div>
-                <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
-                  <stat.icon className="w-6 h-6 text-white" />
+              </div>
+
+              <div className="mt-auto">
+                <div className="text-2xl md:text-3xl font-display font-bold text-gray-900 mb-2 tracking-tight">{stat.value}</div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] md:text-xs font-semibold ${stat.changeType === 'increase' ? 'bg-green-50 text-green-700 ring-1 ring-green-600/10' : 'bg-red-50 text-red-700 ring-1 ring-red-600/10'
+                    }`}>
+                    {stat.change}
+                  </span>
+                  <span className="text-[10px] md:text-xs text-gray-400 font-medium whitespace-nowrap">vs last month</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           {/* Team Management */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             <div className="p-6 border-b border-gray-200">
@@ -429,9 +431,8 @@ export default function AdminDashboard() {
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900">{job.title}</h3>
                         <p className="text-sm text-gray-600">{job.department} • {job.location}</p>
-                        <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
-                          job.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${job.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                          }`}>
                           {job.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </div>
@@ -506,9 +507,8 @@ export default function AdminDashboard() {
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900">{post.title}</h3>
                     <div className="flex items-center space-x-4 mt-1">
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                        post.isPublished ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${post.isPublished ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
                         {post.isPublished ? 'Published' : 'Draft'}
                       </span>
                     </div>
@@ -527,41 +527,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a
-              href="/admin/posts/new"
-              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-all duration-200"
-            >
-              <FileText className="w-8 h-8 text-primary-500" />
-              <div>
-                <h3 className="font-medium text-gray-900">Create New Post</h3>
-                <p className="text-sm text-gray-600">Write a new blog post</p>
-              </div>
-            </a>
-            <a
-              href="/admin/projects/new"
-              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-all duration-200"
-            >
-              <FolderOpen className="w-8 h-8 text-primary-500" />
-              <div>
-                <h3 className="font-medium text-gray-900">Add New Project</h3>
-                <p className="text-sm text-gray-600">Showcase your latest work</p>
-              </div>
-            </a>
-            <a
-              href="/admin/contacts"
-              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-all duration-200"
-            >
-              <MessageSquare className="w-8 h-8 text-primary-500" />
-              <div>
-                <h3 className="font-medium text-gray-900">Review Contacts</h3>
-                <p className="text-sm text-gray-600">Respond to inquiries</p>
-              </div>
-            </a>
-          </div>
-        </div>
+
       </div>
 
       {/* Job Form Modal */}
@@ -578,7 +544,7 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-            
+
             <form onSubmit={handleJobSubmit} className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -586,39 +552,39 @@ export default function AdminDashboard() {
                   <input
                     type="text"
                     value={jobFormData.title}
-                    onChange={(e) => setJobFormData({...jobFormData, title: e.target.value})}
+                    onChange={(e) => setJobFormData({ ...jobFormData, title: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Department *</label>
                   <input
                     type="text"
                     value={jobFormData.department}
-                    onChange={(e) => setJobFormData({...jobFormData, department: e.target.value})}
+                    onChange={(e) => setJobFormData({ ...jobFormData, department: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Location *</label>
                   <input
                     type="text"
                     value={jobFormData.location}
-                    onChange={(e) => setJobFormData({...jobFormData, location: e.target.value})}
+                    onChange={(e) => setJobFormData({ ...jobFormData, location: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Job Type *</label>
                   <select
                     value={jobFormData.type}
-                    onChange={(e) => setJobFormData({...jobFormData, type: e.target.value})}
+                    onChange={(e) => setJobFormData({ ...jobFormData, type: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   >
                     <option value="Full-time">Full-time</option>
@@ -627,73 +593,73 @@ export default function AdminDashboard() {
                     <option value="Internship">Internship</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Salary Range</label>
                   <input
                     type="text"
                     value={jobFormData.salary}
-                    onChange={(e) => setJobFormData({...jobFormData, salary: e.target.value})}
+                    onChange={(e) => setJobFormData({ ...jobFormData, salary: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     placeholder="e.g. ₹10-15 LPA"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Experience Required</label>
                   <input
                     type="text"
                     value={jobFormData.experience}
-                    onChange={(e) => setJobFormData({...jobFormData, experience: e.target.value})}
+                    onChange={(e) => setJobFormData({ ...jobFormData, experience: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     placeholder="e.g. 3-5 years"
                   />
                 </div>
-                
+
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Job Description *</label>
                   <textarea
                     value={jobFormData.description}
-                    onChange={(e) => setJobFormData({...jobFormData, description: e.target.value})}
+                    onChange={(e) => setJobFormData({ ...jobFormData, description: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent h-24 resize-none"
                     required
                   />
                 </div>
-                
+
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Requirements (comma-separated)</label>
                   <textarea
                     value={jobFormData.requirements.join(', ')}
-                    onChange={(e) => setJobFormData({...jobFormData, requirements: e.target.value.split(',').map(r => r.trim()).filter(r => r)})}
+                    onChange={(e) => setJobFormData({ ...jobFormData, requirements: e.target.value.split(',').map(r => r.trim()).filter(r => r) })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent h-20 resize-none"
                     placeholder="React, Node.js, 3+ years experience, etc."
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Display Order</label>
                   <input
                     type="number"
                     value={jobFormData.order}
-                    onChange={(e) => setJobFormData({...jobFormData, order: parseInt(e.target.value) || 0})}
+                    onChange={(e) => setJobFormData({ ...jobFormData, order: parseInt(e.target.value) || 0 })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     min="0"
                   />
                 </div>
-                
+
                 <div className="flex items-center">
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={jobFormData.isActive}
-                      onChange={(e) => setJobFormData({...jobFormData, isActive: e.target.checked})}
+                      onChange={(e) => setJobFormData({ ...jobFormData, isActive: e.target.checked })}
                       className="mr-2"
                     />
                     <span className="text-sm font-medium text-gray-700">Active Job Posting</span>
                   </label>
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
                 <button
                   type="button"
@@ -724,7 +690,7 @@ export default function AdminDashboard() {
                 <h2 className="text-2xl font-bold text-gray-900">
                   {editingTeamId ? 'Edit Team Member' : 'Add Team Member'}
                 </h2>
-                <button 
+                <button
                   onClick={resetTeamForm}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
@@ -732,7 +698,7 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-            
+
             <form onSubmit={handleTeamSubmit} className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Profile Image */}
@@ -764,9 +730,8 @@ export default function AdminDashboard() {
                       />
                       <label
                         htmlFor="image-upload"
-                        className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors ${
-                          uploading ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                        className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors ${uploading ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
                       >
                         <Upload className="w-4 h-4 mr-2" />
                         {uploading ? 'Uploading...' : 'Upload Image'}
@@ -782,60 +747,60 @@ export default function AdminDashboard() {
                   <input
                     type="text"
                     value={teamFormData.name}
-                    onChange={(e) => setTeamFormData({...teamFormData, name: e.target.value})}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, name: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="Enter full name"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Job Title *</label>
                   <input
                     type="text"
                     value={teamFormData.role}
-                    onChange={(e) => setTeamFormData({...teamFormData, role: e.target.value})}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, role: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="e.g. Senior Developer"
                     required
                   />
                 </div>
-                
+
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Bio *</label>
                   <textarea
                     value={teamFormData.bio}
-                    onChange={(e) => setTeamFormData({...teamFormData, bio: e.target.value})}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, bio: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all h-24 resize-none"
                     placeholder="Brief description about the team member..."
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
                   <input
                     type="email"
                     value={teamFormData.email}
-                    onChange={(e) => setTeamFormData({...teamFormData, email: e.target.value})}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, email: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="email@company.com"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Display Order</label>
                   <input
                     type="number"
                     value={teamFormData.order}
-                    onChange={(e) => setTeamFormData({...teamFormData, order: parseInt(e.target.value) || 0})}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, order: parseInt(e.target.value) || 0 })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="0"
                     min="0"
                   />
                 </div>
-                
+
                 {/* Social Links */}
                 <div className="md:col-span-2">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">Social Links</h3>
@@ -845,18 +810,18 @@ export default function AdminDashboard() {
                       <input
                         type="url"
                         value={teamFormData.linkedin}
-                        onChange={(e) => setTeamFormData({...teamFormData, linkedin: e.target.value})}
+                        onChange={(e) => setTeamFormData({ ...teamFormData, linkedin: e.target.value })}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         placeholder="https://linkedin.com/in/username"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">GitHub Profile</label>
                       <input
                         type="url"
                         value={teamFormData.github}
-                        onChange={(e) => setTeamFormData({...teamFormData, github: e.target.value})}
+                        onChange={(e) => setTeamFormData({ ...teamFormData, github: e.target.value })}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         placeholder="https://github.com/username"
                       />
@@ -864,7 +829,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
                 <button
                   type="button"
