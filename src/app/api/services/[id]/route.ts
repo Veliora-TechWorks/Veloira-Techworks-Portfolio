@@ -15,12 +15,23 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    await adminDb.collection('services').doc(params.id).update({ 
+    const docRef = adminDb.collection('services').doc(params.id)
+    const doc = await docRef.get()
+    
+    if (!doc.exists) {
+      return NextResponse.json({ error: 'Service not found' }, { status: 404 })
+    }
+    
+    await docRef.update({ 
       isActive: false,
       deletedAt: new Date()
     })
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete service' }, { status: 500 })
+    console.error('Delete service error:', error)
+    return NextResponse.json({ 
+      error: 'Failed to delete service',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }

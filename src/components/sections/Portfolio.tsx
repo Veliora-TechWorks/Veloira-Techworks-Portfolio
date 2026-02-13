@@ -17,13 +17,30 @@ const Portfolio = () => {
     // Add a small delay to prioritize above-the-fold content
     const timer = setTimeout(() => {
       const timestamp = Date.now()
-      fetch(`/api/projects/public?t=${timestamp}`, { cache: 'no-store' })
-        .then(res => res.json())
+      fetch(`/api/projects/public?t=${timestamp}`, { 
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Failed to fetch projects')
+          }
+          return res.json()
+        })
         .then(data => {
-          setProjects(data.slice(0, 6)) // Limit to 6 projects for performance
+          if (Array.isArray(data)) {
+            setProjects(data.slice(0, 6)) // Limit to 6 projects for performance
+          } else {
+            console.error('Invalid projects data:', data)
+            setProjects([])
+          }
           setLoading(false)
         })
-        .catch(() => setLoading(false))
+        .catch(error => {
+          console.error('Error fetching projects:', error)
+          setProjects([])
+          setLoading(false)
+        })
     }, 100)
 
     return () => clearTimeout(timer)

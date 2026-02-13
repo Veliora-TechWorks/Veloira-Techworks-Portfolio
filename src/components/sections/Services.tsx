@@ -24,13 +24,31 @@ const Services = () => {
   useEffect(() => {
     setMounted(true)
     
-    fetch('/api/services')
-      .then(res => res.json())
+    fetch('/api/services', {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch services')
+        }
+        return res.json()
+      })
       .then(data => {
-        setServices(data.filter((s: any) => s.isActive))
+        if (Array.isArray(data)) {
+          // Only show active services
+          setServices(data.filter((s: any) => s.isActive !== false))
+        } else {
+          console.error('Invalid services data:', data)
+          setServices([])
+        }
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch(error => {
+        console.error('Error fetching services:', error)
+        setServices([])
+        setLoading(false)
+      })
   }, [])
 
   // Prevent hydration mismatch by not rendering animations until mounted

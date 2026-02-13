@@ -4,20 +4,36 @@ import { adminDb } from '@/lib/firebase-admin'
 export async function GET() {
   try {
     const snapshot = await adminDb.collection('services')
-      .where('isActive', '!=', false)
-      .orderBy('isActive')
-      .orderBy('order', 'asc')
-      .limit(20)
+      .limit(50)
       .get()
       
-    const services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    // Filter active services in memory and convert Firestore timestamps
+    const services = snapshot.docs
+      .map(doc => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate?.() || data.createdAt || new Date(),
+          updatedAt: data.updatedAt?.toDate?.() || data.updatedAt
+        }
+      })
+      .filter(service => service.isActive !== false)
+      .sort((a, b) => {
+        const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
+        const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
+        return dateB.getTime() - dateA.getTime()
+      })
     
     return NextResponse.json(services, {
       headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' }
     })
   } catch (error) {
     console.error('Get services error:', error)
-    return NextResponse.json({ error: 'Failed to fetch services' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Failed to fetch services',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 

@@ -31,11 +31,34 @@ export default function ServicesPage() {
 
   const fetchServices = async () => {
     try {
-      const res = await fetch('/api/services')
+      const res = await fetch('/api/services', { 
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      })
+      
+      if (!res.ok) {
+        const errorData = await res.json()
+        console.error('API error response:', errorData)
+        toast.error(errorData.error || `Failed to load services (${res.status})`)
+        setServices([])
+        return
+      }
+      
       const data = await res.json()
+      console.log('Services data:', data)
+      
+      if (!Array.isArray(data)) {
+        console.error('Invalid data format:', data)
+        toast.error('Invalid data format received')
+        setServices([])
+        return
+      }
+      
       setServices(data)
     } catch (error) {
+      console.error('Fetch error:', error)
       toast.error('Failed to load services')
+      setServices([])
     } finally {
       setLoading(false)
     }

@@ -10,20 +10,36 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '50')
     
     const snapshot = await adminDb.collection('projects')
-      .where('isActive', '!=', false)
-      .orderBy('isActive')
-      .orderBy('createdAt', 'desc')
       .limit(limit)
       .get()
       
-    const projects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    // Filter active projects in memory and convert Firestore timestamps
+    const projects = snapshot.docs
+      .map(doc => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate?.() || data.createdAt || new Date(),
+          updatedAt: data.updatedAt?.toDate?.() || data.updatedAt
+        }
+      })
+      .filter(project => project.isActive !== false)
+      .sort((a, b) => {
+        const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
+        const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
+        return dateB.getTime() - dateA.getTime()
+      })
     
     return NextResponse.json(projects, {
       headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' }
     })
   } catch (error) {
     console.error('Get projects error:', error)
-    return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Failed to fetch projects',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 

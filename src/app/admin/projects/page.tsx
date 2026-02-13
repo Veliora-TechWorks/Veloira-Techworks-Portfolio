@@ -37,13 +37,34 @@ export default function ProjectsPage() {
 
   const fetchProjects = async () => {
     try {
-      const res = await fetch('/api/projects')
+      const res = await fetch('/api/projects', { 
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      })
+      
+      if (!res.ok) {
+        const errorData = await res.json()
+        console.error('API error response:', errorData)
+        toast.error(errorData.error || `Failed to load projects (${res.status})`)
+        setProjects([])
+        return
+      }
+      
       const data = await res.json()
-      console.log('Fetched projects:', data)
+      console.log('Projects data:', data)
+      
+      if (!Array.isArray(data)) {
+        console.error('Invalid data format:', data)
+        toast.error('Invalid data format received')
+        setProjects([])
+        return
+      }
+      
       setProjects(data)
     } catch (error) {
       console.error('Fetch error:', error)
       toast.error('Failed to load projects')
+      setProjects([])
     } finally {
       setLoading(false)
     }
