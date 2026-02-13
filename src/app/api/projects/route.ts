@@ -24,8 +24,8 @@ export async function GET(request: Request) {
           updatedAt: data.updatedAt?.toDate?.() || data.updatedAt
         }
       })
-      .filter(project => project.isActive !== false)
-      .sort((a, b) => {
+      .filter((project: any) => project.isActive !== false)
+      .sort((a: any, b: any) => {
         const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
         const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
         return dateB.getTime() - dateA.getTime()

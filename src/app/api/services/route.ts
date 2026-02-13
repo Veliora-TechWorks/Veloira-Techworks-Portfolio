@@ -18,8 +18,8 @@ export async function GET() {
           updatedAt: data.updatedAt?.toDate?.() || data.updatedAt
         }
       })
-      .filter(service => service.isActive !== false)
-      .sort((a, b) => {
+      .filter((service: any) => service.isActive !== false)
+      .sort((a: any, b: any) => {
         const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
         const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
         return dateB.getTime() - dateA.getTime()
