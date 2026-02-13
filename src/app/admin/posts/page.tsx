@@ -84,7 +84,7 @@ export default function PostsPage() {
         content: formData.excerpt,
         category: 'Article',
         image: formData.image,
-        imagePosition: imagePosition,
+        imagePosition: imagePosition || null,
         tags: [formData.linkedinUrl],
         readTime: 5,
         isPublished: formData.isPublished,
@@ -93,6 +93,7 @@ export default function PostsPage() {
       }
 
       console.log('Submitting payload:', payload)
+      console.log('Image position being saved:', imagePosition)
 
       if (editingPost) {
         const res = await fetch(`/api/posts/${editingPost.id}`, {
@@ -238,6 +239,7 @@ export default function PostsPage() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -247,6 +249,27 @@ export default function PostsPage() {
                 <tbody className="divide-y divide-gray-200">
                   {posts.map((post) => (
                     <tr key={post.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gradient-to-br from-primary-100 to-accent-100">
+                          {post.image ? (
+                            <div
+                              className="w-full h-full"
+                              style={{
+                                backgroundImage: `url(${post.image})`,
+                                backgroundSize: post.imagePosition?.zoom ? `${post.imagePosition.zoom}%` : 'cover',
+                                backgroundPosition: post.imagePosition 
+                                  ? `${post.imagePosition.x}% ${post.imagePosition.y}%` 
+                                  : 'center',
+                                backgroundRepeat: 'no-repeat'
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                              No image
+                            </div>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 font-medium text-gray-900">{post.title}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{post.category}</td>
                       <td className="px-6 py-4">
@@ -276,16 +299,35 @@ export default function PostsPage() {
             <div className="md:hidden space-y-4">
               {posts.map((post) => (
                 <div key={post.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900 mb-1">{post.title}</h3>
-                      <p className="text-sm text-gray-600">{post.category}</p>
+                  <div className="flex gap-3 mb-3">
+                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-gradient-to-br from-primary-100 to-accent-100 flex-shrink-0">
+                      {post.image ? (
+                        <div
+                          className="w-full h-full"
+                          style={{
+                            backgroundImage: `url(${post.image})`,
+                            backgroundSize: post.imagePosition?.zoom ? `${post.imagePosition.zoom}%` : 'cover',
+                            backgroundPosition: post.imagePosition 
+                              ? `${post.imagePosition.x}% ${post.imagePosition.y}%` 
+                              : 'center',
+                            backgroundRepeat: 'no-repeat'
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                          No image
+                        </div>
+                      )}
                     </div>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ml-2 ${
-                      post.isPublished ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {post.isPublished ? 'Published' : 'Draft'}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 mb-1 truncate">{post.title}</h3>
+                      <p className="text-sm text-gray-600 mb-2">{post.category}</p>
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        post.isPublished ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {post.isPublished ? 'Published' : 'Draft'}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => handleEdit(post)} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg">
@@ -358,26 +400,35 @@ export default function PostsPage() {
                     </label>
                   </div>
                   {formData.image && (
-                    <div className="mt-2 relative group inline-block">
-                      <div 
-                        className="h-32 w-48 rounded-lg overflow-hidden"
-                        style={{
-                          backgroundImage: `url(${formData.image})`,
-                          backgroundSize: imagePosition ? `${imagePosition.zoom}%` : 'cover',
-                          backgroundPosition: imagePosition 
-                            ? `${imagePosition.x}% ${imagePosition.y}%` 
-                            : 'center',
-                          backgroundRepeat: 'no-repeat'
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setCropperImage(formData.image)}
-                        className="absolute top-2 right-2 bg-blue-500 text-white p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Adjust position"
-                      >
-                        <Crop className="w-4 h-4" />
-                      </button>
+                    <div className="mt-3 space-y-2">
+                      <div className="text-sm font-medium text-gray-700">Preview (as it will appear on blog page):</div>
+                      <div className="relative group w-full max-w-sm">
+                        <div 
+                          className="h-56 w-full rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-100"
+                          style={{
+                            backgroundImage: `url(${formData.image})`,
+                            backgroundSize: imagePosition ? `${imagePosition.zoom}%` : 'cover',
+                            backgroundPosition: imagePosition 
+                              ? `${imagePosition.x}% ${imagePosition.y}%` 
+                              : 'center',
+                            backgroundRepeat: 'no-repeat'
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setCropperImage(formData.image)}
+                          className="absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+                          title="Adjust position"
+                        >
+                          <Crop className="w-4 h-4" />
+                          <span className="text-sm font-medium">Adjust Image</span>
+                        </button>
+                        {imagePosition && (
+                          <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            Zoom: {imagePosition.zoom}% | Position: {Math.round(imagePosition.x)}%, {Math.round(imagePosition.y)}%
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

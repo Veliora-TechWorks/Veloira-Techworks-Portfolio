@@ -100,10 +100,10 @@ export default function ArticlesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredArticles.map((article) => (
                 <article key={article.id} className="card overflow-hidden group hover:scale-105 transition-all duration-300">
-                  <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                  <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                     {article.image ? (
                       <div 
-                        className="w-full h-full"
+                        className="w-full h-full transition-transform duration-300 group-hover:scale-110"
                         style={{
                           backgroundImage: `url(${article.image})`,
                           backgroundSize: article.imagePosition?.zoom ? `${article.imagePosition.zoom}%` : 'cover',

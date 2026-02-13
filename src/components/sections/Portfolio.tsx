@@ -120,6 +120,7 @@ const Portfolio = () => {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 className="card overflow-hidden"
+                onMouseEnter={() => console.log('Project:', project.id, 'imagePositions:', project.imagePositions)}
               >
                 {/* Project Image */}
                 <div className="relative overflow-hidden bg-gradient-to-br from-primary-100 to-accent-100 h-48 sm:h-56 md:h-64">

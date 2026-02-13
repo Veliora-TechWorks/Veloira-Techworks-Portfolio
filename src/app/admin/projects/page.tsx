@@ -98,7 +98,7 @@ export default function ProjectsPage() {
         category: formData.category,
         image: formData.gallery[0] || formData.image,
         gallery: formData.gallery,
-        imagePositions: imagePositions,
+        imagePositions: imagePositions || {},
         technologies: formData.technologies.split(',').map(t => t.trim()),
         features: formData.features.split(',').map(f => f.trim()).filter(f => f),
         content: formData.content || null,
@@ -111,6 +111,7 @@ export default function ProjectsPage() {
       }
 
       console.log('Submitting payload:', payload)
+      console.log('Image positions being saved:', imagePositions)
 
       if (editingProject) {
         const res = await fetch(`/api/projects/${editingProject.id}`, {
@@ -267,6 +268,7 @@ export default function ProjectsPage() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
@@ -277,6 +279,27 @@ export default function ProjectsPage() {
                 <tbody className="divide-y divide-gray-200">
                   {projects.map((project) => (
                     <tr key={project.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gradient-to-br from-primary-100 to-accent-100">
+                          {project.image || project.gallery?.[0] ? (
+                            <div
+                              className="w-full h-full"
+                              style={{
+                                backgroundImage: `url(${project.image || project.gallery[0]})`,
+                                backgroundSize: project.imagePositions?.[0]?.zoom ? `${project.imagePositions[0].zoom}%` : 'cover',
+                                backgroundPosition: project.imagePositions?.[0]
+                                  ? `${project.imagePositions[0].x}% ${project.imagePositions[0].y}%` 
+                                  : 'center',
+                                backgroundRepeat: 'no-repeat'
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                              No image
+                            </div>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 font-medium text-gray-900">{project.title}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{project.category}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{project.client || '-'}</td>
@@ -307,19 +330,38 @@ export default function ProjectsPage() {
             <div className="md:hidden space-y-4">
               {projects.map((project) => (
                 <div key={project.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900 mb-1">{project.title}</h3>
-                      <p className="text-sm text-gray-600">{project.category}</p>
-                      {project.client && <p className="text-sm text-gray-500 mt-1">Client: {project.client}</p>}
+                  <div className="flex gap-3 mb-3">
+                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-gradient-to-br from-primary-100 to-accent-100 flex-shrink-0">
+                      {project.image || project.gallery?.[0] ? (
+                        <div
+                          className="w-full h-full"
+                          style={{
+                            backgroundImage: `url(${project.image || project.gallery[0]})`,
+                            backgroundSize: project.imagePositions?.[0]?.zoom ? `${project.imagePositions[0].zoom}%` : 'cover',
+                            backgroundPosition: project.imagePositions?.[0]
+                              ? `${project.imagePositions[0].x}% ${project.imagePositions[0].y}%` 
+                              : 'center',
+                            backgroundRepeat: 'no-repeat'
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                          No image
+                        </div>
+                      )}
                     </div>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ml-2 ${
-                      project.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {project.isActive ? 'Active' : 'Inactive'}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 mb-1 truncate">{project.title}</h3>
+                      <p className="text-sm text-gray-600 mb-1">{project.category}</p>
+                      {project.client && <p className="text-sm text-gray-500 mb-2 truncate">Client: {project.client}</p>}
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        project.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {project.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex gap-2 mt-3">
+                  <div className="flex gap-2">
                     <button onClick={() => handleEdit(project)} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg">
                       <Edit className="w-4 h-4" />
                       <span>Edit</span>
@@ -385,42 +427,53 @@ export default function ProjectsPage() {
                     />
                   </label>
                   {formData.gallery.length > 0 && (
-                    <div className="mt-3 grid grid-cols-3 gap-2">
-                      {formData.gallery.map((url, index) => (
-                        <div key={index} className="relative group">
-                          <div 
-                            className="h-24 w-full rounded-lg overflow-hidden"
-                            style={{
-                              backgroundImage: `url(${url})`,
-                              backgroundSize: imagePositions[index] ? `${imagePositions[index].zoom}%` : 'cover',
-                              backgroundPosition: imagePositions[index] 
-                                ? `${imagePositions[index].x}% ${imagePositions[index].y}%` 
-                                : 'center',
-                              backgroundRepeat: 'no-repeat'
-                            }}
-                          />
-                          {index === 0 && (
-                            <span className="absolute top-1 left-1 bg-primary-500 text-white text-xs px-2 py-1 rounded">Cover</span>
-                          )}
-                          <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              type="button"
-                              onClick={() => setCropperImage({ url, index })}
-                              className="bg-blue-500 text-white p-1 rounded text-xs"
-                              title="Adjust position"
-                            >
-                              <Crop className="w-3 h-3" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => removeImage(index)}
-                              className="bg-red-500 text-white p-1 rounded"
-                            >
-                              ×
-                            </button>
+                    <div className="mt-3 space-y-3">
+                      <div className="text-sm font-medium text-gray-700">Preview (as they will appear on portfolio page):</div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {formData.gallery.map((url, index) => (
+                          <div key={index} className="relative group">
+                            <div 
+                              className="h-48 w-full rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-100"
+                              style={{
+                                backgroundImage: `url(${url})`,
+                                backgroundSize: imagePositions[index] ? `${imagePositions[index].zoom}%` : 'cover',
+                                backgroundPosition: imagePositions[index] 
+                                  ? `${imagePositions[index].x}% ${imagePositions[index].y}%` 
+                                  : 'center',
+                                backgroundRepeat: 'no-repeat'
+                              }}
+                            />
+                            {index === 0 && (
+                              <span className="absolute top-2 left-2 bg-primary-500 text-white text-xs px-2 py-1 rounded shadow-lg font-medium">
+                                Cover Image
+                              </span>
+                            )}
+                            <div className="absolute top-2 right-2 flex gap-1">
+                              <button
+                                type="button"
+                                onClick={() => setCropperImage({ url, index })}
+                                className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded shadow-lg flex items-center gap-1 text-xs font-medium transition-colors"
+                                title="Adjust position"
+                              >
+                                <Crop className="w-3 h-3" />
+                                Adjust
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => removeImage(index)}
+                                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded shadow-lg text-xs font-medium transition-colors"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                            {imagePositions[index] && (
+                              <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                Zoom: {imagePositions[index].zoom}% | Pos: {Math.round(imagePositions[index].x)}%, {Math.round(imagePositions[index].y)}%
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

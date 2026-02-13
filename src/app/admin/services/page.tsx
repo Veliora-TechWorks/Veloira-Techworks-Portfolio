@@ -70,11 +70,14 @@ export default function ServicesPage() {
         description: formData.description,
         icon: formData.icon,
         image: formData.image,
-        imagePosition: imagePosition,
+        imagePosition: imagePosition || null,
         features: formData.features.split(',').map(f => f.trim()).filter(f => f),
         price: formData.price || null,
         isActive: formData.isActive
       }
+
+      console.log('Submitting service payload:', payload)
+      console.log('Image position being saved:', imagePosition)
 
       if (editingService) {
         await fetch(`/api/services/${editingService.id}`, {
@@ -299,19 +302,33 @@ export default function ServicesPage() {
                     </label>
                   </div>
                   {formData.image && (
-                    <div className="mt-2 relative group inline-block">
-                      <div 
-                        className="h-32 w-48 rounded-lg"
-                        style={{
-                          backgroundImage: `url(${formData.image})`,
-                          backgroundSize: imagePosition ? `${imagePosition.zoom}%` : 'cover',
-                          backgroundPosition: imagePosition ? `${imagePosition.x}% ${imagePosition.y}%` : 'center',
-                          backgroundRepeat: 'no-repeat'
-                        }}
-                      />
-                      <button type="button" onClick={() => setCropperImage(formData.image)} className="absolute top-2 right-2 bg-blue-500 text-white p-2 rounded opacity-0 group-hover:opacity-100">
-                        <Crop className="w-4 h-4" />
-                      </button>
+                    <div className="mt-3 space-y-2">
+                      <div className="text-sm font-medium text-gray-700">Preview (as it will appear on services page):</div>
+                      <div className="relative group w-full max-w-sm">
+                        <div 
+                          className="h-48 w-full rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-100"
+                          style={{
+                            backgroundImage: `url(${formData.image})`,
+                            backgroundSize: imagePosition ? `${imagePosition.zoom}%` : 'cover',
+                            backgroundPosition: imagePosition ? `${imagePosition.x}% ${imagePosition.y}%` : 'center',
+                            backgroundRepeat: 'no-repeat'
+                          }}
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => setCropperImage(formData.image)} 
+                          className="absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+                          title="Adjust position"
+                        >
+                          <Crop className="w-4 h-4" />
+                          <span className="text-sm font-medium">Adjust Image</span>
+                        </button>
+                        {imagePosition && (
+                          <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            Zoom: {imagePosition.zoom}% | Position: {Math.round(imagePosition.x)}%, {Math.round(imagePosition.y)}%
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -359,6 +376,7 @@ export default function ServicesPage() {
             initialPosition={imagePosition || undefined}
             onSave={(position) => {
               setImagePosition(position)
+              setFormData(prev => ({ ...prev, imagePosition: position }))
               setCropperImage(null)
             }}
             onClose={() => setCropperImage(null)}

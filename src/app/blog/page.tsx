@@ -147,10 +147,10 @@ export default function BlogPage() {
               {filteredPosts.map((post) => (
                 <article key={post.id} className="card overflow-hidden group hover:scale-105 transition-all duration-300">
                   {/* Post Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-primary-100 to-accent-100 overflow-hidden">
+                  <div className="relative h-56 bg-gradient-to-br from-primary-100 to-accent-100 overflow-hidden">
                     {post.image ? (
                       <div
-                        className="w-full h-full"
+                        className="w-full h-full transition-transform duration-300 group-hover:scale-110"
                         style={{
                           backgroundImage: `url(${post.image})`,
                           backgroundSize: post.imagePosition?.zoom ? `${post.imagePosition.zoom}%` : 'cover',
@@ -159,6 +159,7 @@ export default function BlogPage() {
                             : 'center',
                           backgroundRepeat: 'no-repeat'
                         }}
+                        onLoad={() => console.log('Post image loaded:', post.id, 'imagePosition:', post.imagePosition)}
                       />
                     ) : (
                       <>
