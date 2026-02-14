@@ -1,10 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Performance optimizations
   compress: true,
   poweredByHeader: false,
+  reactStrictMode: false,
   
-  // Image optimization
+  onDemandEntries: {
+    maxInactiveAge: 60 * 1000,
+    pagesBufferLength: 5,
+  },
+  
+  logging: {
+    fetches: {
+      fullUrl: false,
+    },
+  },
+  
   images: {
     domains: [
       'localhost', 
@@ -13,18 +23,15 @@ const nextConfig = {
       'storage.googleapis.com',
       'velioratechworksportfolio.firebasestorage.app'
     ],
-    formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 31536000, // 1 year
+    formats: ['image/webp'],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
-  // Experimental features for performance
   experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
+    optimizePackageImports: ['lucide-react'],
   },
   
-  // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },

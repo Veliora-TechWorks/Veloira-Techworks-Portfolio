@@ -37,8 +37,8 @@ export default function TeamPage() {
 
   const stats = [
     { icon: Users, label: 'Team Members', value: `${teamMembers.length}+` },
-    { icon: Award, label: 'Years Experience', value: '8+' },
-    { icon: Target, label: 'Projects Delivered', value: '100+' }
+    { icon: Award, label: 'Years Experience', value: '1+' },
+    { icon: Target, label: 'Projects Delivered', value: '5+' }
   ]
 
   return (

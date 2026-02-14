@@ -2,14 +2,12 @@ import type { Metadata } from 'next'
 import { Inter, Poppins } from 'next/font/google'
 import ToasterProvider from '@/components/ToasterProvider'
 import ErrorBoundary from '@/components/ErrorBoundary'
-import PerformanceMonitor from '@/components/PerformanceMonitor'
 import './globals.css'
 
 const inter = Inter({ 
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
-  preload: true,
 })
 
 const poppins = Poppins({ 
@@ -17,7 +15,6 @@ const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
   variable: '--font-poppins',
   display: 'swap',
-  preload: true,
 })
 
 export const metadata: Metadata = {
@@ -52,19 +49,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://res.cloudinary.com" />
-        <link rel="dns-prefetch" href="https://dpd4keszz.cloudinary.com" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#ecc94b" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased`} suppressHydrationWarning>
         <ErrorBoundary>
-          <PerformanceMonitor />
           <ToasterProvider />
           {children}
         </ErrorBoundary>

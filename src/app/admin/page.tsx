@@ -541,8 +541,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-
       </div>
 
       {/* Job Form Modal */}
